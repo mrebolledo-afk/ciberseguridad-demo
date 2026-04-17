@@ -151,6 +151,13 @@ body::before {
 .dom-pill .dot { width: 8px; height: 8px; border-radius: 50%; background: #1d9e75; flex-shrink: 0; }
 .dom-pill.highlighted { background: #eaf3de; border-color: #1d9e75; font-weight: 500; }
 .dom-filter-info { font-size: 12px; color: #888; margin-bottom: .75rem; }
+/* Trap example chips */
+.trap-section { margin-bottom: 1rem; }
+.trap-label { font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; display: block; }
+.trap-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.trap-chip { padding: 5px 12px; border-radius: 20px; border: 1px solid #ddd; background: #f8f8f8; font-size: 12px; font-family: monospace; cursor: pointer; transition: all .15s; color: #555; letter-spacing: .3px; }
+.trap-chip:hover { background: #faece7; border-color: #f0997b; color: #993c1d; }
+.trap-chip.safe-chip:hover { background: #eaf3de; border-color: #9fe1cb; color: #27500a; }
 .tab.factura-tab { border-color: #fac775; color: #633806; background: #fffbf0; }
 .tab.factura-tab.active { background: #854f0b; border-color: #854f0b; color: #fff; }
 .tab.soporte-tab { border-color: #ced4da; color: #495057; background: #f8f9fa; }
@@ -1313,8 +1320,34 @@ body::before {
     <!-- VALIDATOR -->
     <div class="hint-box" style="margin-top:0;margin-bottom:1.5rem;">
       <div class="hint-title">🔍 Validador de remitente</div>
-      <p style="font-size:13px;color:#666;margin-bottom:.85rem;">Escribe el email o dominio que quieres verificar (ej: facturas@serviplana.es)</p>
-      <div class="dom-search-wrap">
+      <p style="font-size:13px;color:#666;margin-bottom:.85rem;">Escribe el email o dominio que quieres verificar, o pulsa uno de los ejemplos:</p>
+
+      <div class="trap-section">
+        <span class="trap-label">⚠️ Dominios trampa — ¿los detectas?</span>
+        <div class="trap-chips">
+          <span class="trap-chip" onclick="loadTrap('facturacion@serviplana.com')">serviplana.com</span>
+          <span class="trap-chip" onclick="loadTrap('pagos@stn-ceramica.es')">stn-ceramica.es</span>
+          <span class="trap-chip" onclick="loadTrap('info@stncerramica.es')">stncerramica.es</span>
+          <span class="trap-chip" onclick="loadTrap('soporte@keratile.net')">keratile.net</span>
+          <span class="trap-chip" onclick="loadTrap('rrhh@logiplana-pagos.es')">logiplana-pagos.es</span>
+          <span class="trap-chip" onclick="loadTrap('ventas@venuxsurface.com')">venuxsurface.com</span>
+          <span class="trap-chip" onclick="loadTrap('hola@tilesaels.es')">tilesaels.es</span>
+          <span class="trap-chip" onclick="loadTrap('admin@sunnahotel.net')">sunnahotel.net</span>
+        </div>
+      </div>
+
+      <div class="trap-section" style="margin-top:.75rem;">
+        <span class="trap-label">✅ Dominios legítimos — confirma que los reconoces</span>
+        <div class="trap-chips">
+          <span class="trap-chip safe-chip" onclick="loadTrap('info@vitacer.es')">vitacer.es</span>
+          <span class="trap-chip safe-chip" onclick="loadTrap('pedidos@cenusa.es')">cenusa.es</span>
+          <span class="trap-chip safe-chip" onclick="loadTrap('reservas@sunnahotel.com')">sunnahotel.com</span>
+          <span class="trap-chip safe-chip" onclick="loadTrap('ventas@venuxslabs.es')">venuxslabs.es</span>
+          <span class="trap-chip safe-chip" onclick="loadTrap('contacto@tilediscount.es')">tilediscount.es</span>
+        </div>
+      </div>
+
+      <div class="dom-search-wrap" style="margin-top:1rem;">
         <input type="text" class="dom-search" id="domInput" placeholder="nombre@dominio.es" oninput="checkDomain(this.value)" autocomplete="off" spellcheck="false">
         <span class="dom-search-icon">🔍</span>
       </div>
@@ -1548,6 +1581,21 @@ const QS = [
     c: 1,
     e: '✅ Aunque <strong>@keratile.es es un dominio válido</strong> del Grupo STN, eso no garantiza que el email sea legítimo — una cuenta puede haber sido comprometida. <strong>Ante cualquier solicitud de datos bancarios, verifica siempre por teléfono</strong> antes de responder, independientemente del dominio.'
   }
+,
+  {
+    q: '🔍 Nivel difícil — ¿Cuál de estos dominios es el ÚNICO legítimo del Grupo STN?',
+    s: '<span class="sq"><span class="lbl">A)</span> info@stncerramica.es &nbsp;<small style="color:#e24b4a">(doble r)</small></span><span class="sq"><span class="lbl">B)</span> pedidos@stnceramica.es &nbsp;<small style="color:#1d9e75">(oficial)</small></span><span class="sq"><span class="lbl">C)</span> ventas@stncerámica.es &nbsp;<small style="color:#e24b4a">(acento)</small></span><span class="sq"><span class="lbl">D)</span> info@stnceramica.es.com &nbsp;<small style="color:#e24b4a">(doble extensión)</small></span>',
+    o: ['A) stncerramica.es — parece igual', 'B) stnceramica.es ✓', 'C) stncerámica.es — lleva acento', 'D) stnceramica.es.com — extensión doble'],
+    c: 1,
+    e: '✅ Solo <strong>@stnceramica.es</strong> es legítimo.<br>❌ <strong>stncerr<u>a</u>mica.es</strong> — lleva doble r, casi invisible a primera vista.<br>❌ <strong>stncer<u>á</u>mica.es</strong> — el acento en la á es un truco: el dominio IDN parece idéntico pero es diferente.<br>❌ <strong>stnceramica.es.com</strong> — la doble extensión .es.com es una táctica clásica para confundir.'
+  },
+  {
+    q: '🔍 Nivel difícil — encuentra el dominio falso entre estos correos de proveedores:',
+    s: '<span class="sq"><span class="lbl">A)</span> facturas@tilesales.es</span><span class="sq"><span class="lbl">B)</span> ofertas@tiledisccount.es &nbsp;<small style="color:#e24b4a">(doble c)</small></span><span class="sq"><span class="lbl">C)</span> info@tileoffer.es</span><span class="sq"><span class="lbl">D)</span> contacto@tiledecorsales.es</span>',
+    o: ['A) tilesales.es', 'B) tiledisccount.es — doble c ✗', 'C) tileoffer.es', 'D) tiledecorsales.es'],
+    c: 1,
+    e: '✅ <strong>tilesales.es, tileoffer.es y tiledecorsales.es</strong> son dominios oficiales del Grupo STN.<br>❌ <strong>tiledis<u>cc</u>ount.es</strong> lleva doble c — un typo de un solo carácter. En una bandeja de entrada con decenas de emails, este error es casi imposible de detectar sin fijarse específicamente en el dominio.'
+  }
 ];
 
 let curQ=0, score=0, quizStarted=false;
@@ -1614,6 +1662,17 @@ const VALID_DOMAINS = [
   'sunnahotel.com','sunnahotel.es','venuxsurface.es','venuxslabs.es',
   'tilesales.es','tileoffer.es','tiledecorsales.es','tilediscount.es'
 ];
+
+function loadTrap(email) {
+  const input = document.getElementById('domInput');
+  input.value = email;
+  input.focus();
+  checkDomain(email);
+  // scroll to result
+  setTimeout(() => {
+    document.getElementById('domResult').scrollIntoView({behavior:'smooth', block:'nearest'});
+  }, 100);
+}
 
 function extractDomain(input) {
   const trimmed = input.trim().toLowerCase();
