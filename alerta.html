@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>⚠️ Alerta de Seguridad — STN</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0a1628;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    animation: bgFlash .6s ease;
+  }
+  @keyframes bgFlash {
+    0%   { background: #e24b4a; }
+    40%  { background: #c0392b; }
+    100% { background: #0a1628; }
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 2rem 1.5rem;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    animation: slideUp .5s .3s both ease;
+    text-align: center;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .alarm-icon {
+    font-size: 64px;
+    display: block;
+    margin-bottom: .75rem;
+    animation: shake .4s .8s both;
+  }
+  @keyframes shake {
+    0%,100% { transform: rotate(0deg); }
+    20%     { transform: rotate(-12deg); }
+    40%     { transform: rotate(12deg); }
+    60%     { transform: rotate(-8deg); }
+    80%     { transform: rotate(8deg); }
+  }
+
+  .badge-danger {
+    display: inline-block;
+    background: #e24b4a;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 1rem;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #a32d2d;
+    margin-bottom: .5rem;
+    line-height: 1.3;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  .flags {
+    list-style: none;
+    background: #fff8f8;
+    border: 1px solid #f7c1c1;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    text-align: left;
+  }
+  .flags li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 6px 0;
+    border-bottom: 1px solid #fde8e8;
+    font-size: 13px;
+    color: #555;
+    line-height: 1.5;
+  }
+  .flags li:last-child { border: none; }
+  .flag-x { color: #e24b4a; font-weight: 700; flex-shrink: 0; font-size: 15px; }
+
+  .lesson {
+    background: #eaf3de;
+    border: 1px solid #9fe1cb;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 13px;
+    color: #27500a;
+    text-align: left;
+    line-height: 1.6;
+  }
+  .lesson strong { color: #1a1a1a; }
+
+  .btn-back {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: #0d2144;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .15s;
+  }
+  .btn-back:hover { background: #1557a0; }
+
+  .footer {
+    margin-top: 1.5rem;
+    font-size: 11px;
+    color: rgba(255,255,255,.35);
+    text-align: center;
+    line-height: 1.7;
+  }
+  .footer strong { color: rgba(255,255,255,.55); }
+
+  /* pulse ring behind icon */
+  .icon-wrap {
+    position: relative;
+    display: inline-block;
+    margin-bottom: .5rem;
+  }
+  .icon-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -12px;
+    border-radius: 50%;
+    background: rgba(226,75,74,.12);
+    animation: pulse 1.5s 1s infinite;
+  }
+  @keyframes pulse {
+    0%   { transform: scale(.9); opacity: .8; }
+    50%  { transform: scale(1.15); opacity: .3; }
+    100% { transform: scale(.9); opacity: .8; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="icon-wrap">
+    <span class="alarm-icon">🎣</span>
+  </div>
+  <span class="badge-danger">Simulación de Phishing</span>
+  <h1>¡Has escaneado un QR malicioso!</h1>
+  <p class="subtitle">Si esto fuera un ataque real, acabarías de acceder a una página falsa desde tu móvil. Así de fácil ocurre.</p>
+
+  <ul class="flags">
+    <li><span class="flag-x">✘</span>El QR estaba en un email de un remitente desconocido (<strong>microsoft-verificacion.com</strong>)</li>
+    <li><span class="flag-x">✘</span>Los QR en emails ocultan la URL — los filtros de seguridad no pueden analizarla</li>
+    <li><span class="flag-x">✘</span>La URL destino era <strong>ms-verify.phish-login.net</strong>, no Microsoft</li>
+    <li><span class="flag-x">✘</span>Al escanear, has saltado al móvil donde hay menos protecciones corporativas</li>
+  </ul>
+
+  <div class="lesson">
+    <strong>✅ La regla de oro:</strong> antes de escanear cualquier QR en un email, comprueba siempre el dominio del remitente. Tu móvil mostrará la URL antes de abrirla — léela antes de confirmar.
+  </div>
+
+  <a class="btn-back" href="https://mrebolledo-afk.github.io/ciberseguridad-demo/">
+    ← Volver a la formación
+  </a>
+</div>
+
+<div class="footer">
+  🔒 Seguridad de la Información &nbsp;·&nbsp; Departamento de IT<br>
+  <strong>Grupo STN</strong> — Esta es una simulación de formación
+</div>
+
+</body>
+</html>
