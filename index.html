@@ -133,6 +133,24 @@ body::before {
 .tab.gmail-tab.active { background: #c0392b; border-color: #c0392b; color: #fff; }
 .tab.quiz-tab { border-color: #9fe1cb; color: #1d9e75; background: #f4fcf8; }
 .tab.quiz-tab.active { background: #17876a; border-color: #17876a; color: #fff; }
+.tab.dom-tab { border-color: #ced4da; color: #0d2144; background: #f0f4ff; }
+.tab.dom-tab.active { background: #0d2144; border-color: #0d2144; color: #fff; }
+/* Domain validator */
+.dom-search-wrap { position: relative; margin-bottom: 1.25rem; }
+.dom-search { width: 100%; padding: 11px 44px 11px 14px; border-radius: 10px; border: 1.5px solid #ddd; font-size: 14px; color: #1a1a1a; outline: none; transition: border .15s; }
+.dom-search:focus { border-color: #378add; }
+.dom-search-icon { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 16px; pointer-events: none; }
+.dom-result { display: none; margin-bottom: 1.25rem; padding: .85rem 1rem; border-radius: 10px; font-size: 14px; font-weight: 500; line-height: 1.5; }
+.dom-result.valid   { background: #eaf3de; border: 1px solid #9fe1cb; color: #27500a; }
+.dom-result.invalid { background: #faece7; border: 1px solid #f0997b; color: #993c1d; }
+.dom-result.warning { background: #faeeda; border: 1px solid #fac775; color: #633806; }
+/* Domain grid */
+.dom-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin-bottom: 1.5rem; }
+.dom-pill { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f8f9fa; border: 1px solid #e8e8e8; border-radius: 8px; font-size: 13px; color: #1a1a1a; transition: all .12s; }
+.dom-pill:hover { background: #eaf3de; border-color: #9fe1cb; }
+.dom-pill .dot { width: 8px; height: 8px; border-radius: 50%; background: #1d9e75; flex-shrink: 0; }
+.dom-pill.highlighted { background: #eaf3de; border-color: #1d9e75; font-weight: 500; }
+.dom-filter-info { font-size: 12px; color: #888; margin-bottom: .75rem; }
 .tab.factura-tab { border-color: #fac775; color: #633806; background: #fffbf0; }
 .tab.factura-tab.active { background: #854f0b; border-color: #854f0b; color: #fff; }
 .tab.soporte-tab { border-color: #ced4da; color: #495057; background: #f8f9fa; }
@@ -377,6 +395,7 @@ body::before {
     <button class="tab soporte-tab"   onclick="showTab('soporte')">🖥️ Soporte técnico</button>
     <button class="tab qr-tab"        onclick="showTab('qr')">📷 QR Phishing</button>
     <button class="tab"               onclick="showTab('ambig')">¿Legítimo o falso?</button>
+    <button class="tab dom-tab"        onclick="showTab('domains')">🏢 Dominios STN</button>
     <button class="tab quiz-tab"      onclick="showTab('quiz')">🧠 Quiz</button>
   </div>
 
@@ -1281,6 +1300,68 @@ body::before {
     </div>
   </div>
 
+
+  <!-- ══════════════════════════════════════════
+       TAB — DOMINIOS SEGUROS STN
+  ══════════════════════════════════════════ -->
+  <div id="tab-domains" class="tab-panel">
+    <div style="margin-bottom:1.25rem;">
+      <p style="font-size:15px;font-weight:600;color:#1a1a1a;margin-bottom:4px;">🏢 Dominios oficiales del Grupo STN</p>
+      <p style="font-size:13px;color:#666;line-height:1.6;">Cualquier email que no provenga de estos dominios debe tratarse con precaución. Usa el validador para comprobar si un remitente es legítimo.</p>
+    </div>
+
+    <!-- VALIDATOR -->
+    <div class="hint-box" style="margin-top:0;margin-bottom:1.5rem;">
+      <div class="hint-title">🔍 Validador de remitente</div>
+      <p style="font-size:13px;color:#666;margin-bottom:.85rem;">Escribe el email o dominio que quieres verificar (ej: facturas@serviplana.es)</p>
+      <div class="dom-search-wrap">
+        <input type="text" class="dom-search" id="domInput" placeholder="nombre@dominio.es" oninput="checkDomain(this.value)" autocomplete="off" spellcheck="false">
+        <span class="dom-search-icon">🔍</span>
+      </div>
+      <div class="dom-result" id="domResult"></div>
+    </div>
+
+    <!-- DOMAIN LIST -->
+    <div class="hint-box" style="margin-top:0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;flex-wrap:wrap;gap:8px;">
+        <div class="hint-title" style="margin-bottom:0;">Dominios válidos (20)</div>
+        <input type="text" style="padding:5px 10px;border-radius:6px;border:1px solid #ddd;font-size:12px;width:160px;" placeholder="Filtrar dominios..." oninput="filterDomains(this.value)">
+      </div>
+      <div class="dom-filter-info" id="domFilterInfo">Mostrando 20 de 20 dominios</div>
+      <div class="dom-grid" id="domGrid">
+        <div class="dom-pill" data-domain="ktlceramica.com"><span class="dot"></span>@ktlceramica.com</div>
+        <div class="dom-pill" data-domain="vitacer.es"><span class="dot"></span>@vitacer.es</div>
+        <div class="dom-pill" data-domain="serviplana.es"><span class="dot"></span>@serviplana.es</div>
+        <div class="dom-pill" data-domain="keratile.es"><span class="dot"></span>@keratile.es</div>
+        <div class="dom-pill" data-domain="nuevaalaplana.es"><span class="dot"></span>@nuevaalaplana.es</div>
+        <div class="dom-pill" data-domain="stnceramica.es"><span class="dot"></span>@stnceramica.es</div>
+        <div class="dom-pill" data-domain="azulmed.es"><span class="dot"></span>@azulmed.es</div>
+        <div class="dom-pill" data-domain="cenusa.es"><span class="dot"></span>@cenusa.es</div>
+        <div class="dom-pill" data-domain="logiplana.es"><span class="dot"></span>@logiplana.es</div>
+        <div class="dom-pill" data-domain="stylnul.es"><span class="dot"></span>@stylnul.es</div>
+        <div class="dom-pill" data-domain="tesany.es"><span class="dot"></span>@tesany.es</div>
+        <div class="dom-pill" data-domain="tesany.com"><span class="dot"></span>@tesany.com</div>
+        <div class="dom-pill" data-domain="sunnahotel.com"><span class="dot"></span>@sunnahotel.com</div>
+        <div class="dom-pill" data-domain="sunnahotel.es"><span class="dot"></span>@sunnahotel.es</div>
+        <div class="dom-pill" data-domain="venuxsurface.es"><span class="dot"></span>@venuxsurface.es</div>
+        <div class="dom-pill" data-domain="venuxslabs.es"><span class="dot"></span>@venuxslabs.es</div>
+        <div class="dom-pill" data-domain="tilesales.es"><span class="dot"></span>@tilesales.es</div>
+        <div class="dom-pill" data-domain="tileoffer.es"><span class="dot"></span>@tileoffer.es</div>
+        <div class="dom-pill" data-domain="tiledecorsales.es"><span class="dot"></span>@tiledecorsales.es</div>
+        <div class="dom-pill" data-domain="tilediscount.es"><span class="dot"></span>@tilediscount.es</div>
+      </div>
+    </div>
+
+    <div class="hint-box" style="margin-top:1rem;">
+      <div class="hint-title">⚠️ Señales de dominios falsos — qué buscar</div>
+      <div class="clue"><div class="clue-icon bad">!</div><div class="clue-text"><strong>Extensión incorrecta:</strong> serviplana.com en lugar de serviplana.es — una letra cambia todo.</div></div>
+      <div class="clue"><div class="clue-icon bad">!</div><div class="clue-text"><strong>Guión añadido:</strong> stn-ceramica.es o servi-plana.es — los atacantes registran variaciones con guiones.</div></div>
+      <div class="clue"><div class="clue-icon bad">!</div><div class="clue-text"><strong>Palabra añadida:</strong> serviplana-pagos.es, stnceramica-facturas.com — parecen del grupo pero no lo son.</div></div>
+      <div class="clue"><div class="clue-icon bad">!</div><div class="clue-text"><strong>Typo de una letra:</strong> servipalana.es, stnceramcia.es — errores sutiles difíciles de detectar a primera vista.</div></div>
+      <div class="clue"><div class="clue-icon good">✓</div><div class="clue-text"><strong>Ante la duda:</strong> consulta esta lista o contacta directamente con el Departamento de IT de STN.</div></div>
+    </div>
+  </div>
+
   <!-- ══════════════════════════════════════════
        TAB — QUIZ
   ══════════════════════════════════════════ -->
@@ -1305,7 +1386,7 @@ body::before {
 
 <script>
 // ─── MAIN TABS ───────────────────────────────
-const TABS = ['docusign','ms365','gmail','factura','soporte','qr','ambig','quiz'];
+const TABS = ['docusign','ms365','gmail','factura','soporte','qr','ambig','domains','quiz'];
 function showTab(t) {
   TABS.forEach(id => document.getElementById('tab-'+id).classList.toggle('active', id===t));
   document.querySelectorAll('.tabs .tab').forEach((b,i) => b.classList.toggle('active', TABS[i]===t));
@@ -1445,6 +1526,28 @@ const QS = [
     c: 1,
     e: '✅ El <strong>MFA (autenticación multifactor)</strong> es la defensa más efectiva. Aunque el atacante tenga tu contraseña, necesitará el segundo factor (tu móvil) para acceder.'
   }
+,
+  {
+    q: 'Recibes un email de facturacion@serviplana.com. ¿Es un remitente legítimo del Grupo STN?',
+    s: '<span class="sq"><span class="lbl">Remitente:</span> facturacion@serviplana.com</span><span class="sq"><span class="lbl">Dominio STN:</span> @serviplana.es (terminación .es)</span>',
+    o: ['Sí — serviplana es una empresa del grupo', 'No — el dominio correcto es @serviplana.es, no .com', 'No hay forma de saberlo sin más información'],
+    c: 1,
+    e: '❌ <strong>serviplana.com no es un dominio válido del Grupo STN.</strong> El oficial es <strong>@serviplana.es</strong>. Aunque el nombre de la empresa sea correcto, la extensión .com en lugar de .es es una señal de alarma clara. Los atacantes registran la versión .com de dominios corporativos .es precisamente para este tipo de engaño.'
+  },
+  {
+    q: '¿Cuál de estos remitentes pertenece a una empresa del Grupo STN?',
+    s: '<span class="sq"><span class="lbl">A)</span> reservas@sunnahotel.net</span><span class="sq"><span class="lbl">B)</span> info@stn-ceramica.es</span><span class="sq"><span class="lbl">C)</span> contacto@venuxsurface.es</span>',
+    o: ['A) sunnahotel.net', 'B) stn-ceramica.es', 'C) venuxsurface.es ✓'],
+    c: 2,
+    e: '✅ <strong>@venuxsurface.es</strong> es un dominio oficial del Grupo STN. <br>❌ <strong>sunnahotel.net</strong> — el oficial es @sunnahotel.es o @sunnahotel.com, no .net.<br>❌ <strong>stn-ceramica.es</strong> — el guión lo delata; el oficial es @stnceramica.es sin guión.'
+  },
+  {
+    q: 'Recibes un email de pedidos@keratile.es solicitando confirmar datos bancarios. ¿Qué haces primero?',
+    s: '<span class="sq"><span class="lbl">De:</span> pedidos@keratile.es</span><span class="sq"><span class="lbl">Asunto:</span> Confirma tu IBAN para el pago del pedido</span>',
+    o: ['Respondo con el IBAN — keratile.es es un dominio válido del grupo', 'Llamo directamente a Keratile para verificar la solicitud antes de responder', 'Marco el email como spam automáticamente'],
+    c: 1,
+    e: '✅ Aunque <strong>@keratile.es es un dominio válido</strong> del Grupo STN, eso no garantiza que el email sea legítimo — una cuenta puede haber sido comprometida. <strong>Ante cualquier solicitud de datos bancarios, verifica siempre por teléfono</strong> antes de responder, independientemente del dominio.'
+  }
 ];
 
 let curQ=0, score=0, quizStarted=false;
@@ -1500,6 +1603,71 @@ function showScore() {
   ];
   document.getElementById('score-label').textContent = L[score] || L[5];
   document.getElementById('score-msg').textContent = M[score] || M[5];
+}
+
+
+// ─── DOMAIN VALIDATOR ─────────────────────────────────────────
+const VALID_DOMAINS = [
+  'ktlceramica.com','vitacer.es','serviplana.es','keratile.es',
+  'nuevaalaplana.es','stnceramica.es','azulmed.es','cenusa.es',
+  'logiplana.es','stylnul.es','tesany.es','tesany.com',
+  'sunnahotel.com','sunnahotel.es','venuxsurface.es','venuxslabs.es',
+  'tilesales.es','tileoffer.es','tiledecorsales.es','tilediscount.es'
+];
+
+function extractDomain(input) {
+  const trimmed = input.trim().toLowerCase();
+  if (trimmed.includes('@')) return trimmed.split('@').pop().trim();
+  return trimmed.replace(/^https?:\/\//, '').split('/')[0].trim();
+}
+
+function checkDomain(val) {
+  const result = document.getElementById('domResult');
+  const pills = document.querySelectorAll('#domGrid .dom-pill');
+  pills.forEach(p => p.classList.remove('highlighted'));
+  if (!val.trim()) { result.style.display='none'; return; }
+  const domain = extractDomain(val);
+  if (!domain || domain.length < 3) { result.style.display='none'; return; }
+
+  const isValid = VALID_DOMAINS.includes(domain);
+  const isSimilar = !isValid && VALID_DOMAINS.some(d => {
+    if (Math.abs(d.length - domain.length) > 4) return false;
+    const base = d.replace('.es','').replace('.com','');
+    const check = domain.replace('.es','').replace('.com','');
+    return check.includes(base) || base.includes(check) ||
+           d.replace('.es','.com') === domain || d.replace('.com','.es') === domain;
+  });
+
+  result.style.display = 'block';
+  if (isValid) {
+    result.className = 'dom-result valid';
+    result.innerHTML = '✅ <strong>@' + domain + '</strong> es un dominio oficial del Grupo STN. Puedes confiar en emails de este remitente, aunque siempre verifica el contexto del mensaje.';
+    pills.forEach(p => { if(p.dataset.domain === domain) { p.classList.add('highlighted'); p.scrollIntoView({behavior:'smooth',block:'nearest'}); }});
+  } else if (isSimilar) {
+    const similar = VALID_DOMAINS.filter(d => {
+      const base = d.replace('.es','').replace('.com','');
+      const check = domain.replace('.es','').replace('.com','');
+      return check.includes(base) || base.includes(check) ||
+             d.replace('.es','.com') === domain || d.replace('.com','.es') === domain;
+    });
+    result.className = 'dom-result warning';
+    result.innerHTML = '⚠️ <strong>@' + domain + '</strong> NO está en la lista oficial. Es similar a: <strong>@' + similar.join(', @') + '</strong> — podría ser un intento de suplantación. Verifica el dominio exacto.';
+  } else {
+    result.className = 'dom-result invalid';
+    result.innerHTML = '❌ <strong>@' + domain + '</strong> NO pertenece al Grupo STN. Trata este email con precaución y no facilites información sensible sin verificación.';
+  }
+}
+
+function filterDomains(val) {
+  const pills = document.querySelectorAll('#domGrid .dom-pill');
+  const q = val.trim().toLowerCase();
+  let visible = 0;
+  pills.forEach(p => {
+    const match = !q || p.dataset.domain.includes(q);
+    p.style.display = match ? '' : 'none';
+    if (match) visible++;
+  });
+  document.getElementById('domFilterInfo').textContent = `Mostrando ${visible} de ${VALID_DOMAINS.length} dominios`;
 }
 
 startQuiz();
