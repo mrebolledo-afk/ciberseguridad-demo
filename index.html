@@ -3,498 +3,909 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Demo: Phishing de Firma Electrónica</title>
+<title>Demo: Concienciación Anti-Phishing — STN</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #f5f5f0;
-    color: #1a1a1a;
-    padding: 2rem 1rem;
-    min-height: 100vh;
-  }
-  .page-title {
-    text-align: center;
-    margin-bottom: 2rem;
-  }
-  .page-title h1 {
-    font-size: 22px;
-    font-weight: 500;
-    color: #1a1a1a;
-    margin-bottom: 6px;
-  }
-  .page-title p {
-    font-size: 14px;
-    color: #666;
-  }
-  .wrapper {
-    max-width: 760px;
-    margin: 0 auto;
-  }
-  .tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-  }
-  .tab {
-    padding: 8px 18px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    background: transparent;
-    color: #666;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all .15s;
-  }
-  .tab.active {
-    background: #fff;
-    color: #1a1a1a;
-    border-color: #aaa;
-    box-shadow: 0 1px 4px rgba(0,0,0,.08);
-  }
-  .tab:hover:not(.active) { background: #eee; }
-  .email-card {
-    background: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,.06);
-  }
-  .email-header {
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid #e8e8e8;
-    background: #fafafa;
-  }
-  .meta-row {
-    display: flex;
-    gap: 8px;
-    align-items: baseline;
-    margin-bottom: 6px;
-    font-size: 13px;
-  }
-  .meta-label { color: #999; min-width: 36px; }
-  .meta-val { color: #1a1a1a; }
-  .meta-val.ok {
-    background: #eaf3de;
-    color: #27500a;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-weight: 500;
-  }
-  .meta-val.suspicious {
-    background: #faece7;
-    color: #993c1d;
-    padding: 2px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    border: 1px solid #f0997b;
-    position: relative;
-    font-weight: 500;
-  }
-  .tooltip {
-    display: none;
-    position: absolute;
-    left: 0;
-    top: 110%;
-    background: #2c2c2a;
-    color: #d3d1c7;
-    font-size: 12px;
-    padding: 6px 10px;
-    border-radius: 6px;
-    white-space: nowrap;
-    z-index: 10;
-    pointer-events: none;
-  }
-  .suspicious:hover .tooltip { display: block; }
-  .subject {
-    font-size: 15px;
-    font-weight: 500;
-    color: #1a1a1a;
-    margin-top: 8px;
-  }
-  .email-body { padding: 1.25rem; }
-  .body-text {
-    font-size: 14px;
-    color: #555;
-    line-height: 1.7;
-    margin-bottom: 1rem;
-  }
-  .cta-btn {
-    display: inline-block;
-    padding: 10px 22px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    border: none;
-    color: #fff;
-  }
-  .cta-btn.safe { background: #1d9e75; }
-  .cta-btn.phish { background: #e24b4a; }
-  .cta-btn.unknown { background: #378add; }
-  .link-row {
-    display: none;
-    margin-top: 8px;
-    font-size: 12px;
-    color: #999;
-  }
-  .link-real { color: #185fa5; word-break: break-all; }
-  .link-fake { color: #a32d2d; font-weight: 500; word-break: break-all; }
-  .action-row {
-    margin-top: 1rem;
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .inspect-btn {
-    padding: 7px 14px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    background: transparent;
-    color: #555;
-    cursor: pointer;
-    font-size: 12px;
-    transition: background .12s;
-  }
-  .inspect-btn:hover { background: #f0f0f0; color: #1a1a1a; }
-  .verdict {
-    display: none;
-    margin-top: 1rem;
-    padding: .75rem 1rem;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    line-height: 1.5;
-  }
-  .verdict.danger {
-    background: #faece7;
-    color: #993c1d;
-    border: 1px solid #f0997b;
-  }
-  .verdict.safe {
-    background: #eaf3de;
-    color: #3b6d11;
-    border: 1px solid #9fe1cb;
-  }
-  .hint-box {
-    margin-top: 1.5rem;
-    padding: 1rem 1.25rem;
-    border-radius: 12px;
-    background: #fff;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 1px 4px rgba(0,0,0,.05);
-  }
-  .hint-title {
-    font-size: 13px;
-    font-weight: 500;
-    color: #666;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-  }
-  .clue {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    padding: 8px 0;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 13px;
-  }
-  .clue:last-child { border: none; }
-  .clue-icon {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    font-size: 11px;
-    font-weight: 700;
-    margin-top: 1px;
-  }
-  .clue-icon.bad { background: #f7c1c1; color: #a32d2d; }
-  .clue-icon.good { background: #c0dd97; color: #3b6d11; }
-  .clue-text { color: #555; line-height: 1.5; }
-  .clue-text strong { color: #1a1a1a; }
-  .step-label {
-    font-size: 12px;
-    color: #888;
-    margin-bottom: .75rem;
-  }
-  .compare-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  @media (max-width: 500px) {
-    .compare-grid { grid-template-columns: 1fr; }
-  }
-  .compare-card { border-radius: 10px; overflow: hidden; border: 1px solid #e0e0e0; }
-  .compare-head { padding: .75rem 1rem; }
-  .compare-head.real { background: #eaf3de; }
-  .compare-head.fake { background: #faece7; }
-  .compare-head span { font-size: 13px; font-weight: 500; }
-  .compare-head.real span { color: #27500a; }
-  .compare-head.fake span { color: #993c1d; }
-  .compare-body { padding: .75rem 1rem; background: #fff; }
-  .compare-row { margin-bottom: 10px; }
-  .compare-row-label { font-size: 11px; color: #aaa; margin-bottom: 2px; text-transform: uppercase; letter-spacing: .04em; }
-  .compare-row-val { font-size: 13px; font-weight: 500; }
-  .compare-row-val.good { color: #27500a; }
-  .compare-row-val.bad { color: #a32d2d; }
-  .compare-row-val.neutral { color: #555; }
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f0; color: #1a1a1a; padding: 2rem 1rem; min-height: 100vh; }
+.page-title { text-align: center; margin-bottom: 2rem; }
+.page-title h1 { font-size: 22px; font-weight: 500; color: #1a1a1a; margin-bottom: 6px; }
+.page-title p { font-size: 14px; color: #666; }
+.wrapper { max-width: 780px; margin: 0 auto; }
+
+/* ── MAIN TABS ── */
+.tabs { display: flex; gap: 6px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.tab { padding: 8px 14px; border-radius: 8px; border: 1px solid #ddd; background: transparent; color: #666; cursor: pointer; font-size: 13px; font-weight: 500; transition: all .15s; white-space: nowrap; }
+.tab.active { background: #fff; color: #1a1a1a; border-color: #aaa; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+.tab:hover:not(.active) { background: #eee; }
+.tab.ms-tab { border-color: #b3cfee; color: #185fa5; }
+.tab.ms-tab.active { background: #e6f1fb; border-color: #378add; color: #0c447c; }
+.tab.gmail-tab { border-color: #f7c1c1; color: #a32d2d; }
+.tab.gmail-tab.active { background: #fcebeb; border-color: #e24b4a; color: #791f1f; }
+.tab.quiz-tab { border-color: #9fe1cb; color: #1d9e75; }
+.tab.quiz-tab.active { background: #eaf3de; border-color: #1d9e75; color: #27500a; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── SECTION TABS (sub-pestañas) ── */
+.section-tabs { display: flex; gap: 6px; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+.section-tab { padding: 6px 16px; border-radius: 20px; border: 1px solid #ddd; background: transparent; color: #888; cursor: pointer; font-size: 13px; font-weight: 500; transition: all .12s; }
+.section-tab.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+.section-tab:hover:not(.active) { background: #f0f0f0; color: #555; }
+.section-panel { display: none; }
+.section-panel.active { display: block; }
+
+/* ── EMAIL CARD ── */
+.email-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.email-header { padding: 1rem 1.25rem; border-bottom: 1px solid #e8e8e8; background: #fafafa; }
+.meta-row { display: flex; gap: 8px; align-items: baseline; margin-bottom: 6px; font-size: 13px; flex-wrap: wrap; }
+.meta-label { color: #999; min-width: 36px; flex-shrink: 0; }
+.meta-val { color: #1a1a1a; word-break: break-all; }
+.meta-val.ok { background: #eaf3de; color: #27500a; padding: 2px 8px; border-radius: 4px; font-weight: 500; word-break: break-all; }
+.meta-val.suspicious { background: #faece7; color: #993c1d; padding: 2px 8px; border-radius: 4px; cursor: pointer; border: 1px solid #f0997b; position: relative; font-weight: 500; word-break: break-all; }
+.tooltip { display: none; position: absolute; left: 0; top: 110%; background: #2c2c2a; color: #d3d1c7; font-size: 12px; padding: 6px 10px; border-radius: 6px; z-index: 100; pointer-events: none; max-width: 260px; white-space: normal; line-height: 1.5; }
+.suspicious:hover .tooltip { display: block; }
+.subject { font-size: 15px; font-weight: 500; color: #1a1a1a; margin-top: 8px; line-height: 1.4; }
+.email-body { padding: 1.25rem; }
+.body-text { font-size: 14px; color: #555; line-height: 1.7; margin-bottom: 1rem; }
+
+/* ── BUTTONS ── */
+.cta-btn { display: inline-block; padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; color: #fff; margin-bottom: 4px; }
+.cta-safe   { background: #1d9e75; }
+.cta-phish  { background: #e24b4a; }
+.cta-ms     { background: #378add; }
+.cta-ghost  { background: #888; opacity:.65; pointer-events:none; }
+.link-row { display: none; margin-top: 8px; font-size: 12px; color: #999; line-height: 1.6; }
+.link-real { color: #185fa5; word-break: break-all; }
+.link-fake { color: #a32d2d; font-weight: 500; word-break: break-all; }
+.action-row { margin-top: 1rem; display: flex; gap: 8px; flex-wrap: wrap; }
+.inspect-btn { padding: 7px 14px; border-radius: 8px; border: 1px solid #ddd; background: transparent; color: #555; cursor: pointer; font-size: 12px; transition: background .12s; }
+.inspect-btn:hover { background: #f0f0f0; color: #1a1a1a; }
+.verdict { display: none; margin-top: 1rem; padding: .75rem 1rem; border-radius: 8px; font-size: 13px; font-weight: 500; line-height: 1.5; }
+.verdict.danger { background: #faece7; color: #993c1d; border: 1px solid #f0997b; }
+.verdict.safe   { background: #eaf3de; color: #3b6d11; border: 1px solid #9fe1cb; }
+
+/* ── HINT BOX ── */
+.hint-box { margin-top: 1.5rem; padding: 1rem 1.25rem; border-radius: 12px; background: #fff; border: 1px solid #e0e0e0; }
+.hint-title { font-size: 12px; font-weight: 600; color: #888; margin-bottom: 10px; text-transform: uppercase; letter-spacing: .06em; }
+.clue { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+.clue:last-child { border: none; }
+.clue-icon { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 11px; font-weight: 700; margin-top: 1px; }
+.clue-icon.bad  { background: #f7c1c1; color: #a32d2d; }
+.clue-icon.good { background: #c0dd97; color: #3b6d11; }
+.clue-icon.warn { background: #fac775; color: #633806; }
+.clue-text { color: #555; line-height: 1.5; }
+.clue-text strong { color: #1a1a1a; }
+.step-label { font-size: 12px; color: #888; margin-bottom: .75rem; }
+
+/* ── COMPARE GRID ── */
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 520px) { .compare-grid { grid-template-columns: 1fr; } }
+.compare-card { border-radius: 10px; overflow: hidden; border: 1px solid #e0e0e0; }
+.compare-head { padding: .75rem 1rem; }
+.compare-head.real   { background: #eaf3de; }
+.compare-head.fake   { background: #faece7; }
+.compare-head span { font-size: 13px; font-weight: 500; }
+.compare-head.real span  { color: #27500a; }
+.compare-head.fake span  { color: #993c1d; }
+.compare-body { padding: .75rem 1rem; background: #fff; }
+.compare-row { margin-bottom: 10px; }
+.compare-row-label { font-size: 11px; color: #aaa; margin-bottom: 2px; text-transform: uppercase; letter-spacing: .04em; }
+.compare-row-val { font-size: 13px; font-weight: 500; }
+.compare-row-val.good    { color: #27500a; }
+.compare-row-val.bad     { color: #a32d2d; }
+.compare-row-val.neutral { color: #555; }
+
+/* ── PHISHING OVERLAY ── */
+.phish-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.78); z-index: 1000; align-items: center; justify-content: center; }
+.phish-overlay.show { display: flex; }
+.phish-modal { background: #fff; border-radius: 16px; padding: 2rem; max-width: 460px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,.35); animation: popIn .22s ease; }
+@keyframes popIn { from { transform: scale(.84); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.phish-modal .icon { font-size: 46px; text-align: center; margin-bottom: 1rem; }
+.phish-modal h2 { font-size: 19px; font-weight: 600; text-align: center; margin-bottom: .5rem; }
+.phish-modal h2.red { color: #a32d2d; }
+.phish-modal h2.orange { color: #854f0b; }
+.phish-modal p { font-size: 13px; color: #555; line-height: 1.6; text-align: center; margin-bottom: 1.25rem; }
+.phish-flags { list-style: none; margin-bottom: 1.5rem; }
+.phish-flags li { display: flex; gap: 8px; align-items: flex-start; padding: 6px 0; font-size: 13px; color: #555; border-bottom: 1px solid #f5f5f5; }
+.phish-flags li:last-child { border: none; }
+.flag-icon { color: #e24b4a; flex-shrink: 0; margin-top: 1px; }
+.phish-close { width: 100%; padding: 10px; border-radius: 8px; border: none; background: #1d9e75; color: #fff; font-size: 14px; font-weight: 500; cursor: pointer; }
+.phish-close:hover { background: #17876a; }
+
+/* ── BADGE ── */
+.badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 6px; padding: 3px 10px; font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+.badge.docusign { background: #e6f1fb; border: 1px solid #b3cfee; color: #185fa5; }
+.badge.ms       { background: #e6f1fb; border: 1px solid #b3cfee; color: #185fa5; }
+.badge.internal { background: #eaf3de; border: 1px solid #9fe1cb; color: #27500a; }
+.badge.gmail    { background: #fcebeb; border: 1px solid #f7c1c1; color: #791f1f; }
+
+/* ── AMBIGUOUS CAROUSEL ── */
+.ambig-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.ambig-nav-info { }
+.ambig-nav-title { font-size: 14px; font-weight: 500; color: #555; }
+.ambig-nav-count { font-size: 12px; color: #999; margin-top: 2px; }
+.ambig-nav-btns { display: flex; gap: 6px; }
+.nav-btn { padding: 5px 12px; border-radius: 6px; border: 1px solid #ddd; background: #fff; color: #555; font-size: 12px; cursor: pointer; transition: all .12s; }
+.nav-btn:hover:not(:disabled) { background: #f0f0f0; }
+.nav-btn:disabled { opacity: .4; cursor: default; }
+.ambig-scenario { display: none; }
+.ambig-scenario.active { display: block; }
+.ambig-buttons { display: flex; gap: 12px; margin: 1rem 0; flex-wrap: wrap; }
+.ambig-btn { flex: 1; min-width: 130px; padding: 11px; border-radius: 10px; border: 2px solid #ddd; background: #fff; font-size: 14px; font-weight: 500; cursor: pointer; transition: all .15s; color: #555; }
+.ambig-btn:hover:not(:disabled) { border-color: #aaa; background: #f8f8f8; }
+.ambig-btn.chosen-correct { border-color: #1d9e75; background: #eaf3de; color: #27500a; }
+.ambig-btn.chosen-wrong   { border-color: #e24b4a; background: #faece7; color: #993c1d; }
+.ambig-result { display: none; margin-top: 1rem; padding: 1rem 1.25rem; border-radius: 10px; font-size: 14px; line-height: 1.7; }
+.ambig-result.correct { background: #eaf3de; border: 1px solid #9fe1cb; color: #27500a; }
+.ambig-result.wrong   { background: #faece7; border: 1px solid #f0997b; color: #993c1d; }
+.ambig-score-bar { display: flex; align-items: center; gap: 10px; margin-top: 1rem; padding: .75rem 1rem; background: #f5f5f0; border-radius: 8px; font-size: 13px; color: #555; }
+
+/* ── QUIZ ── */
+.quiz-progress { font-size: 12px; color: #888; margin-bottom: 1rem; }
+.quiz-question { font-size: 15px; font-weight: 500; color: #1a1a1a; margin-bottom: 1rem; line-height: 1.5; }
+.quiz-snippet { background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; font-size: 13px; line-height: 1.9; }
+.sq { display: block; }
+.sq .lbl { font-weight: 600; color: #888; min-width: 65px; display: inline-block; }
+.quiz-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1rem; }
+.quiz-opt { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #ddd; background: #fff; font-size: 13px; font-weight: 500; cursor: pointer; transition: all .15s; color: #555; text-align: left; line-height: 1.4; }
+.quiz-opt:hover:not(:disabled) { border-color: #aaa; background: #f8f8f8; }
+.quiz-opt.correct { background: #eaf3de; border-color: #1d9e75; color: #27500a; }
+.quiz-opt.wrong   { background: #faece7; border-color: #e24b4a; color: #993c1d; }
+.quiz-opt:disabled { cursor: default; }
+.quiz-explanation { display: none; padding: .75rem 1rem; border-radius: 8px; font-size: 13px; line-height: 1.6; margin-bottom: 1rem; }
+.quiz-explanation.show { display: block; background: #f5f5f0; border: 1px solid #ddd; color: #444; }
+.quiz-next { padding: 9px 20px; border-radius: 8px; border: 1px solid #ddd; background: #fff; color: #555; font-size: 14px; cursor: pointer; display: none; }
+.quiz-next.show { display: inline-block; }
+.quiz-next:hover { background: #f0f0f0; }
+.quiz-score { display: none; text-align: center; padding: 2rem 1rem; }
+.score-num { font-size: 52px; font-weight: 700; color: #1d9e75; line-height: 1; }
+.score-label { font-size: 15px; color: #666; margin: 8px 0 1rem; }
+.score-msg { font-size: 14px; color: #555; line-height: 1.6; max-width: 380px; margin: 0 auto 1.5rem; }
+.quiz-restart { padding: 10px 24px; border-radius: 8px; border: none; background: #378add; color: #fff; font-size: 14px; font-weight: 500; cursor: pointer; }
 </style>
 </head>
 <body>
-<div class="wrapper">
-  <div class="page-title">
-    <h1>🔐 Phishing de Firma Electrónica</h1>
-    <p>Aprende a distinguir un correo legítimo de DocuSign de uno falso.</p>
-  </div>
 
-  <div class="tabs">
-    <button class="tab active" onclick="showTab('real')">Correo legítimo</button>
-    <button class="tab" onclick="showTab('fake')">Correo sospechoso</button>
-    <button class="tab" onclick="showTab('compare')">Comparar pistas</button>
-  </div>
-
-  <!-- TAB: REAL -->
-  <div id="tab-real" class="tab-panel active">
-    <p class="step-label">Este es un correo genuino de DocuSign. Analiza su estructura.</p>
-    <div class="email-card">
-      <div class="email-header">
-        <div class="meta-row">
-          <span class="meta-label">De:</span>
-          <span class="meta-val ok">no-reply@docusign.com</span>
-        </div>
-        <div class="meta-row">
-          <span class="meta-label">Para:</span>
-          <span class="meta-val">administracion@stnceramica.es</span>
-        </div>
-        <div class="meta-row">
-          <span class="meta-label">Hora:</span>
-          <span class="meta-val">Hoy, 10:42 AM</span>
-        </div>
-        <div class="subject">Contrato de servicios — pendiente de tu firma</div>
-      </div>
-      <div class="email-body">
-        <p class="body-text">Hola,<br><br>
-          Acme Corp te ha enviado un documento para que lo revises y firmes.
-          Este documento estará disponible durante <strong>30 días</strong>.
-        </p>
-        <button class="cta-btn unknown" onclick="revealLink('real')">Revisar documento</button>
-        <div class="link-row" id="link-real">
-          URL real: <span class="link-real">https://app.docusign.com/sign/d4f7a8b2...</span>
-        </div>
-        <div class="action-row">
-          <button class="inspect-btn" onclick="revealLink('real')">Ver URL del enlace</button>
-          <button class="inspect-btn" onclick="revealVerdict('real')">Ver veredicto</button>
-        </div>
-        <div class="verdict safe" id="verdict-real">
-          ✔ Dominio oficial &nbsp;·&nbsp; ✔ HTTPS &nbsp;·&nbsp; ✔ Sin urgencia artificial &nbsp;·&nbsp; ✔ URL coherente con la plataforma
-        </div>
-      </div>
-    </div>
-    <div class="hint-box">
-      <div class="hint-title">Señales de confianza</div>
-      <div class="clue">
-        <div class="clue-icon good">✓</div>
-        <div class="clue-text"><strong>Dominio exacto:</strong> docusign.com — sin variaciones ni subdominios raros.</div>
-      </div>
-      <div class="clue">
-        <div class="clue-icon good">✓</div>
-        <div class="clue-text"><strong>Sin urgencia extrema:</strong> indica plazo razonable (30 días), no "actúa en 24 h o se elimina tu cuenta".</div>
-      </div>
-      <div class="clue">
-        <div class="clue-icon good">✓</div>
-        <div class="clue-text"><strong>Enlace coherente:</strong> el botón lleva a app.docusign.com, no a un dominio externo.</div>
-      </div>
-      <div class="clue">
-        <div class="clue-icon good">✓</div>
-        <div class="clue-text"><strong>Sin datos sensibles:</strong> no pide contraseñas ni datos bancarios directamente en el email.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAB: FAKE -->
-  <div id="tab-fake" class="tab-panel">
-    <p class="step-label">Pasa el cursor sobre los elementos marcados en naranja para descubrir las pistas.</p>
-    <div class="email-card">
-      <div class="email-header">
-        <div class="meta-row">
-          <span class="meta-label">De:</span>
-          <span class="meta-val suspicious">
-            no-reply@docusign-secure.net
-            <span class="tooltip">docusign-secure.net ≠ docusign.com — dominio falso</span>
-          </span>
-        </div>
-        <div class="meta-row">
-          <span class="meta-label">Para:</span>
-          <span class="meta-val">administracion@stnceramica.es</span>
-        </div>
-        <div class="meta-row">
-          <span class="meta-label">Hora:</span>
-          <span class="meta-val suspicious">
-            Hoy, 2:17 AM
-            <span class="tooltip">Los envíos automáticos legítimos rara vez son a las 2 AM</span>
-          </span>
-        </div>
-        <div class="subject">
-          <span class="meta-val suspicious" style="padding:2px 8px;border-radius:4px;">
-            ⚠️ URGENTE: tu firma es requerida — vence en 2 horas
-            <span class="tooltip">Urgencia extrema = presión para no pensar</span>
-          </span>
-        </div>
-      </div>
-      <div class="email-body">
-        <p class="body-text">Estimado/a usuario/a,<br><br>
-          Su documento <strong>LEGAL-FINAL-v2.pdf</strong> requiere firma
-          <strong style="color:#e24b4a">INMEDIATA</strong>. Si no actúa en las
-          próximas 2 horas su cuenta quedará
-          <strong style="color:#e24b4a">SUSPENDIDA PERMANENTEMENTE</strong>.
-        </p>
-        <button class="cta-btn phish" onclick="revealLink('fake')">FIRMAR AHORA</button>
-        <div class="link-row" id="link-fake">
-          URL real oculta: <span class="link-fake">http://docusign-verificacion.co/login?redirect=collect</span>
-        </div>
-        <div class="action-row">
-          <button class="inspect-btn" onclick="revealLink('fake')">Ver URL del enlace</button>
-          <button class="inspect-btn" onclick="revealVerdict('fake')">Ver veredicto</button>
-        </div>
-        <div class="verdict danger" id="verdict-fake">
-          ✘ Dominio falso &nbsp;·&nbsp; ✘ HTTP sin cifrado &nbsp;·&nbsp; ✘ Urgencia fabricada &nbsp;·&nbsp; ✘ URL de captura de credenciales
-        </div>
-      </div>
-    </div>
-    <div class="hint-box">
-      <div class="hint-title">Pistas de phishing</div>
-      <div class="clue">
-        <div class="clue-icon bad">!</div>
-        <div class="clue-text"><strong>Dominio falso:</strong> docusign-secure.net imita a docusign.com pero es un dominio completamente diferente, registrado por atacantes.</div>
-      </div>
-      <div class="clue">
-        <div class="clue-icon bad">!</div>
-        <div class="clue-text"><strong>Urgencia fabricada:</strong> "2 horas o cuenta suspendida" es una táctica clásica de presión para que actúes sin verificar.</div>
-      </div>
-      <div class="clue">
-        <div class="clue-icon bad">!</div>
-        <div class="clue-text"><strong>Enlace malicioso:</strong> el botón lleva a docusign-verificacion.co — dominio ajeno con /login para capturar credenciales.</div>
-      </div>
-      <div class="clue">
-        <div class="clue-icon bad">!</div>
-        <div class="clue-text"><strong>Saludo genérico:</strong> "Estimado/a usuario/a" en lugar de tu nombre real, señal de envío masivo.</div>
-      </div>
-      <div class="clue">
-        <div class="clue-icon bad">!</div>
-        <div class="clue-text"><strong>Mayúsculas y alarmas:</strong> el uso excesivo de URGENTE, INMEDIATA, PERMANENTEMENTE busca nublar el juicio.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAB: COMPARE -->
-  <div id="tab-compare" class="tab-panel">
-    <div class="compare-grid">
-      <div class="compare-card">
-        <div class="compare-head real"><span>Correo legítimo</span></div>
-        <div class="compare-body">
-          <div class="compare-row">
-            <div class="compare-row-label">Dominio</div>
-            <div class="compare-row-val good">docusign.com</div>
-          </div>
-          <div class="compare-row">
-            <div class="compare-row-label">Urgencia</div>
-            <div class="compare-row-val neutral">Plazo razonable</div>
-          </div>
-          <div class="compare-row">
-            <div class="compare-row-label">Enlace</div>
-            <div class="compare-row-val good">app.docusign.com</div>
-          </div>
-          <div class="compare-row">
-            <div class="compare-row-label">Saludo</div>
-            <div class="compare-row-val neutral">Con tu nombre</div>
-          </div>
-          <div class="compare-row">
-            <div class="compare-row-label">Protocolo</div>
-            <div class="compare-row-val good">HTTPS</div>
-          </div>
-          <div class="compare-row">
-            <div class="compare-row-label">Consecuencias</div>
-            <div class="compare-row-val neutral">Neutras</div>
-          </div>
-        </div>
-      </div>
-      <div class="compare-card">
-        <div class="compare-head fake"><span>Correo falso (phishing)</span></div>
-        <div class="compare-body">
-          <div class="compare-row">
-            <div class="compare-row-label">Dominio</div>
-            <div class="compare-row-val bad">docusign-secure.net</div>
-          </div>
-          <div class="compare-row">
-            <div class="compare-row-label">Urgencia</div>
-            <div class="compare-row-val bad">2 horas o suspensión</div>
-          </div>
-          <div class="compare-row">
-            <div class="compare-row-label">Enlace</div>
-            <div class="compare-row-val bad">docusign-verificacion.co</div>
-          </div>
-          <div class="compare-row">
-            <div class="compare-row-label">Saludo</div>
-            <div class="compare-row-val bad">Genérico / masivo</div>
-          </div>
-          <div class="compare-row">
-            <div class="compare-row-label">Protocolo</div>
-            <div class="compare-row-val bad">HTTP (sin cifrado)</div>
-          </div>
-          <div class="compare-row">
-            <div class="compare-row-label">Consecuencias</div>
-            <div class="compare-row-val bad">Amenazas extremas</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="hint-box" style="margin-top:1rem">
-      <div class="hint-title">La regla de oro ante cualquier email de firma</div>
-      <div class="clue">
-        <div class="clue-icon good">1</div>
-        <div class="clue-text"><strong>Verifica el dominio completo</strong> — no te fijes solo en el nombre, sino en todo lo que va después de @.</div>
-      </div>
-      <div class="clue">
-        <div class="clue-icon good">2</div>
-        <div class="clue-text"><strong>Pasa el cursor sobre el enlace</strong> antes de hacer clic. La URL real aparece en la barra del navegador.</div>
-      </div>
-      <div class="clue">
-        <div class="clue-icon good">3</div>
-        <div class="clue-text"><strong>Desconfía de la urgencia extrema.</strong> Las plataformas legítimas no suspenden cuentas en 2 horas.</div>
-      </div>
-      <div class="clue">
-        <div class="clue-icon good">4</div>
-        <div class="clue-text"><strong>Ante la duda, ve directamente</strong> al sitio oficial (docusign.com) en lugar de usar el enlace del email.</div>
-      </div>
-    </div>
+<!-- ═══════ OVERLAYS ═══════ -->
+<div class="phish-overlay" id="ov-docusign">
+  <div class="phish-modal">
+    <div class="icon">🎣</div>
+    <h2 class="red">¡Has caído en el phishing!</h2>
+    <p>Si esto fuera real, acabarías de entregar tus credenciales a un atacante. Así de rápido ocurre.</p>
+    <ul class="phish-flags">
+      <li><span class="flag-icon">✘</span>Dominio falso: <strong>docusign-secure.net</strong> ≠ docusign.com</li>
+      <li><span class="flag-icon">✘</span>Enlace a <strong>docusign-verificacion.co</strong> — captura credenciales</li>
+      <li><span class="flag-icon">✘</span>Urgencia fabricada: "2 horas o suspensión"</li>
+      <li><span class="flag-icon">✘</span>Saludo genérico sin tu nombre real</li>
+    </ul>
+    <button class="phish-close" onclick="closeOv('ov-docusign','ds-verdict-fake')">Entendido — ver las pistas</button>
   </div>
 </div>
 
+<div class="phish-overlay" id="ov-ms365">
+  <div class="phish-modal">
+    <div class="icon">🔓</div>
+    <h2 class="red">¡Credenciales de Microsoft comprometidas!</h2>
+    <p>Acabas de introducir tu usuario y contraseña en una página falsa. El atacante tiene ahora acceso a tu correo, Teams, OneDrive y SharePoint.</p>
+    <ul class="phish-flags">
+      <li><span class="flag-icon">✘</span>Dominio: <strong>microsoft-secure-login.net</strong> no es Microsoft</li>
+      <li><span class="flag-icon">✘</span>Microsoft nunca usa dominios con guiones para sus logins</li>
+      <li><span class="flag-icon">✘</span>URL real: <strong>http://microsoft-secure-login.net/signin</strong></li>
+      <li><span class="flag-icon">✘</span>"Cuenta desactivada en 24h" — amenaza falsa de presión</li>
+    </ul>
+    <button class="phish-close" onclick="closeOv('ov-ms365','ms-verdict-fake')">Entendido — ver las pistas</button>
+  </div>
+</div>
+
+<div class="phish-overlay" id="ov-gmail">
+  <div class="phish-modal">
+    <div class="icon">⚠️</div>
+    <h2 class="orange">¡Suplantación de identidad interna!</h2>
+    <p>Acabas de responder a alguien que <strong>no es quien dice ser</strong>. Esta técnica se llama BEC — Business Email Compromise — y es responsable de millones en fraudes anuales.</p>
+    <ul class="phish-flags">
+      <li><span class="flag-icon">✘</span>El remitente era <strong>miguel.rebolledo.stn@gmail.com</strong>, no @stnceramica.es</li>
+      <li><span class="flag-icon">✘</span>Un compañero nunca usa Gmail para asuntos internos urgentes</li>
+      <li><span class="flag-icon">✘</span>La solicitud de transferencia urgente a una cuenta nueva es la señal más clara</li>
+      <li><span class="flag-icon">✘</span>Nunca realices transferencias sin verificar por teléfono al solicitante</li>
+    </ul>
+    <button class="phish-close" onclick="closeOv('ov-gmail','gm-verdict-fake')">Entendido — ver las pistas</button>
+  </div>
+</div>
+
+<!-- ═══════ PÁGINA ═══════ -->
+<div class="wrapper">
+  <div class="page-title">
+    <h1>🔐 Concienciación Anti-Phishing — STN</h1>
+    <p>Aprende a detectar correos fraudulentos antes de hacer clic.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active"    onclick="showTab('docusign')">🖊️ DocuSign</button>
+    <button class="tab ms-tab"    onclick="showTab('ms365')">🔷 Microsoft 365</button>
+    <button class="tab gmail-tab" onclick="showTab('gmail')">📧 Suplantación</button>
+    <button class="tab"           onclick="showTab('ambig')">¿Legítimo o falso?</button>
+    <button class="tab quiz-tab"  onclick="showTab('quiz')">🧠 Quiz</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB — DOCUSIGN
+  ══════════════════════════════════════════ -->
+  <div id="tab-docusign" class="tab-panel active">
+    <div class="section-tabs">
+      <button class="section-tab active" onclick="showSection('ds','real')">✅ Correo legítimo</button>
+      <button class="section-tab"        onclick="showSection('ds','fake')">❌ Correo phishing</button>
+      <button class="section-tab"        onclick="showSection('ds','compare')">Comparar</button>
+    </div>
+
+    <!-- DS: legítimo -->
+    <div id="ds-real" class="section-panel active">
+      <p class="step-label">Así se ve un correo genuino de DocuSign.</p>
+      <div class="email-card">
+        <div class="email-header">
+          <div class="badge docusign">🖊️ DocuSign</div>
+          <div class="meta-row"><span class="meta-label">De:</span><span class="meta-val ok">no-reply@docusign.com</span></div>
+          <div class="meta-row"><span class="meta-label">Para:</span><span class="meta-val">administracion@stnceramica.es</span></div>
+          <div class="meta-row"><span class="meta-label">Hora:</span><span class="meta-val">Hoy, 10:42 AM</span></div>
+          <div class="subject">Contrato de servicios STN Cerámica — pendiente de tu firma</div>
+        </div>
+        <div class="email-body">
+          <p class="body-text">Hola,<br><br>STN Cerámica S.L. te ha enviado un documento para que lo revises y firmes. Estará disponible durante <strong>30 días</strong>.</p>
+          <button class="cta-btn cta-safe" onclick="rl('ds-link-real')">Revisar documento</button>
+          <div class="link-row" id="ds-link-real">URL: <span class="link-real">https://app.docusign.com/sign/d4f7a8b2...</span></div>
+          <div class="action-row">
+            <button class="inspect-btn" onclick="rl('ds-link-real')">Ver URL del enlace</button>
+            <button class="inspect-btn" onclick="rv('ds-verdict-real')">Ver veredicto</button>
+          </div>
+          <div class="verdict safe" id="ds-verdict-real">✔ Dominio oficial &nbsp;·&nbsp; ✔ HTTPS &nbsp;·&nbsp; ✔ Sin urgencia artificial &nbsp;·&nbsp; ✔ URL coherente</div>
+        </div>
+      </div>
+      <div class="hint-box">
+        <div class="hint-title">Señales de confianza</div>
+        <div class="clue"><div class="clue-icon good">✓</div><div class="clue-text"><strong>Dominio exacto:</strong> docusign.com sin variaciones.</div></div>
+        <div class="clue"><div class="clue-icon good">✓</div><div class="clue-text"><strong>Plazo razonable:</strong> 30 días, sin presión de tiempo.</div></div>
+        <div class="clue"><div class="clue-icon good">✓</div><div class="clue-text"><strong>Enlace coherente:</strong> apunta a app.docusign.com.</div></div>
+        <div class="clue"><div class="clue-icon good">✓</div><div class="clue-text"><strong>Sin datos sensibles:</strong> no pide contraseñas en el email.</div></div>
+      </div>
+    </div>
+
+    <!-- DS: phishing -->
+    <div id="ds-fake" class="section-panel">
+      <p class="step-label">Pasa el cursor sobre los elementos en naranja. ¿Te atreves a hacer clic en el botón?</p>
+      <div class="email-card">
+        <div class="email-header">
+          <div class="meta-row">
+            <span class="meta-label">De:</span>
+            <span class="meta-val suspicious">no-reply@docusign-secure.net<span class="tooltip">docusign-secure.net ≠ docusign.com<br>Dominio registrado por atacantes</span></span>
+          </div>
+          <div class="meta-row"><span class="meta-label">Para:</span><span class="meta-val">administracion@stnceramica.es</span></div>
+          <div class="meta-row">
+            <span class="meta-label">Hora:</span>
+            <span class="meta-val suspicious">Hoy, 2:17 AM<span class="tooltip">Los sistemas legítimos rara vez envían a las 2 AM</span></span>
+          </div>
+          <div class="subject">
+            <span class="meta-val suspicious" style="padding:2px 8px;border-radius:4px;">⚠️ URGENTE: tu firma es requerida — vence en 2 horas<span class="tooltip">Urgencia extrema = táctica de presión</span></span>
+          </div>
+        </div>
+        <div class="email-body">
+          <p class="body-text">Estimado/a usuario/a,<br><br>Su documento <strong>LEGAL-FINAL-v2.pdf</strong> requiere firma <strong style="color:#e24b4a">INMEDIATA</strong>. Si no actúa en las próximas 2 horas su cuenta quedará <strong style="color:#e24b4a">SUSPENDIDA PERMANENTEMENTE</strong>.</p>
+          <button class="cta-btn cta-phish" onclick="openOv('ov-docusign','ds-link-fake')">FIRMAR AHORA</button>
+          <div class="link-row" id="ds-link-fake">URL oculta: <span class="link-fake">http://docusign-verificacion.co/login?redirect=collect</span></div>
+          <div class="action-row">
+            <button class="inspect-btn" onclick="rl('ds-link-fake')">Ver URL del enlace</button>
+            <button class="inspect-btn" onclick="rv('ds-verdict-fake')">Ver veredicto</button>
+          </div>
+          <div class="verdict danger" id="ds-verdict-fake">✘ Dominio falso &nbsp;·&nbsp; ✘ HTTP sin cifrado &nbsp;·&nbsp; ✘ Urgencia fabricada &nbsp;·&nbsp; ✘ URL de captura</div>
+        </div>
+      </div>
+      <div class="hint-box">
+        <div class="hint-title">Pistas de phishing</div>
+        <div class="clue"><div class="clue-icon bad">!</div><div class="clue-text"><strong>Dominio falso:</strong> docusign-secure.net imita a docusign.com pero es completamente diferente.</div></div>
+        <div class="clue"><div class="clue-icon bad">!</div><div class="clue-text"><strong>Urgencia fabricada:</strong> "2 horas o suspensión" — presión para actuar sin verificar.</div></div>
+        <div class="clue"><div class="clue-icon bad">!</div><div class="clue-text"><strong>Enlace malicioso:</strong> redirige a docusign-verificacion.co para capturar credenciales.</div></div>
+        <div class="clue"><div class="clue-icon bad">!</div><div class="clue-text"><strong>Saludo genérico:</strong> "Estimado/a usuario/a" en lugar de tu nombre real.</div></div>
+        <div class="clue"><div class="clue-icon bad">!</div><div class="clue-text"><strong>Mayúsculas agresivas:</strong> URGENTE, INMEDIATA, PERMANENTEMENTE busca nublar el juicio.</div></div>
+      </div>
+    </div>
+
+    <!-- DS: comparar -->
+    <div id="ds-compare" class="section-panel">
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="compare-head real"><span>DocuSign legítimo</span></div>
+          <div class="compare-body">
+            <div class="compare-row"><div class="compare-row-label">Dominio</div><div class="compare-row-val good">docusign.com</div></div>
+            <div class="compare-row"><div class="compare-row-label">Urgencia</div><div class="compare-row-val neutral">Plazo de 30 días</div></div>
+            <div class="compare-row"><div class="compare-row-label">Enlace</div><div class="compare-row-val good">app.docusign.com</div></div>
+            <div class="compare-row"><div class="compare-row-label">Saludo</div><div class="compare-row-val neutral">Nombre real</div></div>
+            <div class="compare-row"><div class="compare-row-label">Protocolo</div><div class="compare-row-val good">HTTPS</div></div>
+            <div class="compare-row"><div class="compare-row-label">Amenazas</div><div class="compare-row-val neutral">Ninguna</div></div>
+          </div>
+        </div>
+        <div class="compare-card">
+          <div class="compare-head fake"><span>DocuSign phishing</span></div>
+          <div class="compare-body">
+            <div class="compare-row"><div class="compare-row-label">Dominio</div><div class="compare-row-val bad">docusign-secure.net</div></div>
+            <div class="compare-row"><div class="compare-row-label">Urgencia</div><div class="compare-row-val bad">2 horas o suspensión</div></div>
+            <div class="compare-row"><div class="compare-row-label">Enlace</div><div class="compare-row-val bad">docusign-verificacion.co</div></div>
+            <div class="compare-row"><div class="compare-row-label">Saludo</div><div class="compare-row-val bad">Genérico / masivo</div></div>
+            <div class="compare-row"><div class="compare-row-label">Protocolo</div><div class="compare-row-val bad">HTTP sin cifrado</div></div>
+            <div class="compare-row"><div class="compare-row-label">Amenazas</div><div class="compare-row-val bad">Suspensión permanente</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="hint-box" style="margin-top:1rem">
+        <div class="hint-title">Regla de oro — DocuSign</div>
+        <div class="clue"><div class="clue-icon good">1</div><div class="clue-text">El único dominio oficial es <strong>docusign.com</strong>. Cualquier variación es sospechosa.</div></div>
+        <div class="clue"><div class="clue-icon good">2</div><div class="clue-text">Pasa el cursor sobre el enlace antes de hacer clic y verifica que apunte a docusign.com.</div></div>
+        <div class="clue"><div class="clue-icon good">3</div><div class="clue-text">Ante la duda, accede directamente a docusign.com desde tu navegador.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB — MICROSOFT 365
+  ══════════════════════════════════════════ -->
+  <div id="tab-ms365" class="tab-panel">
+    <div class="section-tabs">
+      <button class="section-tab active" onclick="showSection('ms','real')">✅ Correo legítimo</button>
+      <button class="section-tab"        onclick="showSection('ms','fake')">❌ Correo phishing</button>
+      <button class="section-tab"        onclick="showSection('ms','compare')">Comparar</button>
+    </div>
+
+    <!-- M365: legítimo -->
+    <div id="ms-real" class="section-panel active">
+      <p class="step-label">Así se ve una alerta real de seguridad de Microsoft.</p>
+      <div class="email-card">
+        <div class="email-header">
+          <div class="badge ms">🔷 Microsoft</div>
+          <div class="meta-row"><span class="meta-label">De:</span><span class="meta-val ok">account-security-noreply@accountprotection.microsoft.com</span></div>
+          <div class="meta-row"><span class="meta-label">Para:</span><span class="meta-val">administracion@stnceramica.es</span></div>
+          <div class="meta-row"><span class="meta-label">Hora:</span><span class="meta-val">Hoy, 10:05 AM</span></div>
+          <div class="subject">Alerta de seguridad: nuevo inicio de sesión en tu cuenta</div>
+        </div>
+        <div class="email-body">
+          <p class="body-text">Detectamos un inicio de sesión en tu cuenta de Microsoft:<br><br>
+            📍 <strong>Ubicación:</strong> Barcelona, España<br>
+            💻 <strong>Dispositivo:</strong> Windows 11 · Chrome<br>
+            🕐 <strong>Fecha:</strong> 17 de abril de 2026, 09:58<br><br>
+            Si fuiste tú, no es necesario hacer nada. Si no reconoces esta actividad, protege tu cuenta.
+          </p>
+          <button class="cta-btn cta-ms" onclick="rl('ms-link-real')">Revisar actividad reciente</button>
+          <div class="link-row" id="ms-link-real">URL: <span class="link-real">https://account.microsoft.com/activity</span></div>
+          <div class="action-row">
+            <button class="inspect-btn" onclick="rl('ms-link-real')">Ver URL del enlace</button>
+            <button class="inspect-btn" onclick="rv('ms-verdict-real')">Ver veredicto</button>
+          </div>
+          <div class="verdict safe" id="ms-verdict-real">✔ Subdominio de microsoft.com &nbsp;·&nbsp; ✔ HTTPS &nbsp;·&nbsp; ✔ Detalles específicos &nbsp;·&nbsp; ✔ Sin presión</div>
+        </div>
+      </div>
+      <div class="hint-box">
+        <div class="hint-title">Señales de confianza en emails de Microsoft</div>
+        <div class="clue"><div class="clue-icon good">✓</div><div class="clue-text"><strong>Subdominio oficial:</strong> accountprotection.microsoft.com termina en .microsoft.com.</div></div>
+        <div class="clue"><div class="clue-icon good">✓</div><div class="clue-text"><strong>Información específica:</strong> incluye ubicación, dispositivo y hora exacta del acceso.</div></div>
+        <div class="clue"><div class="clue-icon good">✓</div><div class="clue-text"><strong>Sin urgencia agresiva:</strong> informa sin amenazar ni exigir acción en tiempo limitado.</div></div>
+        <div class="clue"><div class="clue-icon good">✓</div><div class="clue-text"><strong>Enlace a account.microsoft.com:</strong> dominio oficial de gestión de cuentas.</div></div>
+      </div>
+    </div>
+
+    <!-- M365: phishing -->
+    <div id="ms-fake" class="section-panel">
+      <p class="step-label">Phishing de Microsoft 365 muy común en empresas. Pasa el cursor sobre los elementos en naranja.</p>
+      <div class="email-card">
+        <div class="email-header">
+          <div class="meta-row">
+            <span class="meta-label">De:</span>
+            <span class="meta-val suspicious">microsoft-security@microsoft-secure-login.net<span class="tooltip">microsoft-secure-login.net NO es Microsoft.<br>Microsoft nunca usa dominios con guiones.</span></span>
+          </div>
+          <div class="meta-row"><span class="meta-label">Para:</span><span class="meta-val">administracion@stnceramica.es</span></div>
+          <div class="meta-row">
+            <span class="meta-label">Hora:</span>
+            <span class="meta-val suspicious">Hoy, 3:44 AM<span class="tooltip">Hora inusual para un sistema empresarial</span></span>
+          </div>
+          <div class="subject">
+            <span class="meta-val suspicious" style="padding:2px 8px;border-radius:4px;">⚠️ Tu cuenta de Microsoft 365 será desactivada en 24 horas<span class="tooltip">Amenaza falsa para generar pánico</span></span>
+          </div>
+        </div>
+        <div class="email-body">
+          <p class="body-text">Estimado usuario,<br><br>Hemos detectado actividad <strong style="color:#e24b4a">SOSPECHOSA</strong> en tu cuenta corporativa. Tu acceso a <strong>correo, Teams, OneDrive y SharePoint</strong> será <strong style="color:#e24b4a">DESACTIVADO EN 24 HORAS</strong> si no verificas tu identidad. Introduce tus credenciales para confirmar que eres el propietario.</p>
+          <button class="cta-btn cta-phish" onclick="openOv('ov-ms365','ms-link-fake')">Verificar cuenta ahora</button>
+          <div class="link-row" id="ms-link-fake">URL oculta: <span class="link-fake">http://microsoft-secure-login.net/signin?user=admin&org=stn</span></div>
+          <div class="action-row">
+            <button class="inspect-btn" onclick="rl('ms-link-fake')">Ver URL del enlace</button>
+            <button class="inspect-btn" onclick="rv('ms-verdict-fake')">Ver veredicto</button>
+          </div>
+          <div class="verdict danger" id="ms-verdict-fake">✘ Dominio falso &nbsp;·&nbsp; ✘ HTTP sin cifrado &nbsp;·&nbsp; ✘ Pide credenciales &nbsp;·&nbsp; ✘ Amenaza de desactivación</div>
+        </div>
+      </div>
+      <div class="hint-box">
+        <div class="hint-title">Pistas de phishing en Microsoft 365</div>
+        <div class="clue"><div class="clue-icon bad">!</div><div class="clue-text"><strong>Dominio impostor:</strong> microsoft-secure-login.net — Microsoft NUNCA usa dominios con guiones fuera de microsoft.com.</div></div>
+        <div class="clue"><div class="clue-icon bad">!</div><div class="clue-text"><strong>Pide credenciales por email:</strong> Microsoft nunca solicita usuario y contraseña a través de un enlace de email.</div></div>
+        <div class="clue"><div class="clue-icon bad">!</div><div class="clue-text"><strong>Amenaza de desactivación en 24h:</strong> Microsoft nunca desactiva cuentas sin aviso oficial previo.</div></div>
+        <div class="clue"><div class="clue-icon bad">!</div><div class="clue-text"><strong>Lista de servicios afectados:</strong> mencionar Teams, OneDrive y SharePoint amplifica el miedo — ingeniería social.</div></div>
+        <div class="clue"><div class="clue-icon bad">!</div><div class="clue-text"><strong>Saludo genérico:</strong> "Estimado usuario" en lugar de tu nombre corporativo real.</div></div>
+      </div>
+    </div>
+
+    <!-- M365: comparar -->
+    <div id="ms-compare" class="section-panel">
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="compare-head real"><span>Microsoft 365 legítimo</span></div>
+          <div class="compare-body">
+            <div class="compare-row"><div class="compare-row-label">Dominio</div><div class="compare-row-val good">*.microsoft.com</div></div>
+            <div class="compare-row"><div class="compare-row-label">Detalles</div><div class="compare-row-val neutral">Ubicación, dispositivo, hora</div></div>
+            <div class="compare-row"><div class="compare-row-label">Acción</div><div class="compare-row-val neutral">Opcional, no urgente</div></div>
+            <div class="compare-row"><div class="compare-row-label">Enlace</div><div class="compare-row-val good">account.microsoft.com</div></div>
+            <div class="compare-row"><div class="compare-row-label">Credenciales</div><div class="compare-row-val good">Nunca las pide</div></div>
+            <div class="compare-row"><div class="compare-row-label">Amenaza</div><div class="compare-row-val neutral">Ninguna</div></div>
+          </div>
+        </div>
+        <div class="compare-card">
+          <div class="compare-head fake"><span>Phishing Microsoft 365</span></div>
+          <div class="compare-body">
+            <div class="compare-row"><div class="compare-row-label">Dominio</div><div class="compare-row-val bad">microsoft-secure-login.net</div></div>
+            <div class="compare-row"><div class="compare-row-label">Detalles</div><div class="compare-row-val bad">Vagos o inexistentes</div></div>
+            <div class="compare-row"><div class="compare-row-label">Acción</div><div class="compare-row-val bad">Urgente, 24 horas</div></div>
+            <div class="compare-row"><div class="compare-row-label">Enlace</div><div class="compare-row-val bad">Dominio externo falso</div></div>
+            <div class="compare-row"><div class="compare-row-label">Credenciales</div><div class="compare-row-val bad">Las solicita directamente</div></div>
+            <div class="compare-row"><div class="compare-row-label">Amenaza</div><div class="compare-row-val bad">Desactivación total</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="hint-box" style="margin-top:1rem">
+        <div class="hint-title">Reglas específicas para Microsoft 365</div>
+        <div class="clue"><div class="clue-icon good">1</div><div class="clue-text">El dominio siempre termina en <strong>.microsoft.com</strong> — sin guiones, sin variaciones.</div></div>
+        <div class="clue"><div class="clue-icon good">2</div><div class="clue-text"><strong>Microsoft nunca pide credenciales por email.</strong> Si lo hace, es phishing sin excepciones.</div></div>
+        <div class="clue"><div class="clue-icon good">3</div><div class="clue-text">Activa el <strong>MFA</strong> en todas las cuentas. Aunque roben tu contraseña, no podrán acceder.</div></div>
+        <div class="clue"><div class="clue-icon good">4</div><div class="clue-text">Ante cualquier duda, ve directamente a <strong>portal.microsoft.com</strong>.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB — SUPLANTACIÓN GMAIL (BEC)
+  ══════════════════════════════════════════ -->
+  <div id="tab-gmail" class="tab-panel">
+    <div class="section-tabs">
+      <button class="section-tab active" onclick="showSection('gm','real')">✅ Correo interno real</button>
+      <button class="section-tab"        onclick="showSection('gm','fake')">❌ Suplantación Gmail</button>
+      <button class="section-tab"        onclick="showSection('gm','compare')">Comparar</button>
+    </div>
+
+    <!-- Gmail: correo interno real -->
+    <div id="gm-real" class="section-panel active">
+      <p class="step-label">Así se ve un correo interno legítimo de un compañero de STN.</p>
+      <div class="email-card">
+        <div class="email-header">
+          <div class="badge internal">🏢 Correo interno STN</div>
+          <div class="meta-row"><span class="meta-label">De:</span><span class="meta-val ok">miguel.rebolledo@stnceramica.es</span></div>
+          <div class="meta-row"><span class="meta-label">Para:</span><span class="meta-val">administracion@stnceramica.es</span></div>
+          <div class="meta-row"><span class="meta-label">Hora:</span><span class="meta-val">Hoy, 9:30 AM</span></div>
+          <div class="subject">Pago proveedor Cerámica Sur — documentación adjunta</div>
+        </div>
+        <div class="email-body">
+          <p class="body-text">Buenos días,<br><br>
+            Os adjunto la factura de Cerámica Sur S.L. (proveedor habitual) por el pedido de marzo. El importe es <strong>2.840,00 €</strong> y el plazo de pago es el 30 de abril según contrato.<br><br>
+            El número de cuenta es el que ya tenemos registrado en el sistema. Cualquier duda me decís.
+          </p>
+          <button class="cta-btn cta-safe" onclick="rv('gm-verdict-real')">Ver veredicto</button>
+          <div class="verdict safe" id="gm-verdict-real">✔ Dominio corporativo @stnceramica.es &nbsp;·&nbsp; ✔ Proveedor conocido &nbsp;·&nbsp; ✔ Cuenta ya registrada &nbsp;·&nbsp; ✔ Sin presión de tiempo</div>
+        </div>
+      </div>
+      <div class="hint-box">
+        <div class="hint-title">Señales de confianza en correo interno</div>
+        <div class="clue"><div class="clue-icon good">✓</div><div class="clue-text"><strong>Dominio corporativo:</strong> @stnceramica.es — confirma que es un compañero real de la empresa.</div></div>
+        <div class="clue"><div class="clue-icon good">✓</div><div class="clue-text"><strong>Proveedor conocido:</strong> se refiere a una empresa ya registrada en el sistema.</div></div>
+        <div class="clue"><div class="clue-icon good">✓</div><div class="clue-text"><strong>Cuenta bancaria ya existente:</strong> no solicita cambiar a una nueva cuenta.</div></div>
+        <div class="clue"><div class="clue-icon good">✓</div><div class="clue-text"><strong>Sin urgencia:</strong> plazo normal, sin presión para actuar hoy.</div></div>
+      </div>
+    </div>
+
+    <!-- Gmail: suplantación phishing -->
+    <div id="gm-fake" class="section-panel">
+      <p class="step-label">Este es el ataque BEC (Business Email Compromise) más frecuente en empresas. Pasa el cursor sobre los elementos en naranja.</p>
+      <div class="email-card">
+        <div class="email-header">
+          <div class="badge gmail">📧 Gmail externo</div>
+          <div class="meta-row">
+            <span class="meta-label">De:</span>
+            <span class="meta-val suspicious">miguel.rebolledo.stn@gmail.com<span class="tooltip">Gmail externo ≠ correo corporativo.<br>Un compañero NUNCA usa Gmail para pagos urgentes.</span></span>
+          </div>
+          <div class="meta-row"><span class="meta-label">Para:</span><span class="meta-val">administracion@stnceramica.es</span></div>
+          <div class="meta-row">
+            <span class="meta-label">Hora:</span>
+            <span class="meta-val suspicious">Hoy, 7:58 AM<span class="tooltip">Hora inusual — antes de empezar la jornada</span></span>
+          </div>
+          <div class="subject">
+            <span class="meta-val suspicious" style="padding:2px 8px;border-radius:4px;">URGENTE — transferencia a proveedor nuevo HOY antes del cierre<span class="tooltip">Urgencia extrema + fecha límite = táctica BEC clásica</span></span>
+          </div>
+        </div>
+        <div class="email-body">
+          <p class="body-text">Buenos días,<br><br>
+            Estoy en reunión y no puedo llamar. Necesito que <strong>hoy antes de las 14:00</strong> se realice una transferencia de <strong style="color:#e24b4a">8.500,00 €</strong> a un proveedor nuevo que acaba de confirmar pedido urgente.<br><br>
+            <strong>Cuenta destino:</strong> ES76 0049 1234 5678 9012 3456<br>
+            <strong>Beneficiario:</strong> Suministros Industriales XYZ S.L.<br><br>
+            Es confidencial, no lo comentes con nadie hasta que confirme yo. Te llamo luego.
+          </p>
+          <button class="cta-btn cta-phish" onclick="openOv('ov-gmail','gm-link-fake')">Confirmar transferencia</button>
+          <div class="link-row" id="gm-link-fake">⚠️ Esta acción enviaría <strong>8.500 € a una cuenta bancaria fraudulenta</strong>. El dinero sería irrecuperable.</div>
+          <div class="action-row">
+            <button class="inspect-btn" onclick="rl('gm-link-fake')">Ver consecuencia</button>
+            <button class="inspect-btn" onclick="rv('gm-verdict-fake')">Ver veredicto</button>
+          </div>
+          <div class="verdict danger" id="gm-verdict-fake">✘ Gmail externo ≠ correo corporativo &nbsp;·&nbsp; ✘ Cuenta bancaria nueva y desconocida &nbsp;·&nbsp; ✘ "Confidencial, no lo comentes" &nbsp;·&nbsp; ✘ Urgencia artificial</div>
+        </div>
+      </div>
+      <div class="hint-box">
+        <div class="hint-title">Señales del ataque BEC (suplantación de identidad)</div>
+        <div class="clue"><div class="clue-icon bad">!</div><div class="clue-text"><strong>Gmail externo:</strong> un compañero NUNCA usa una cuenta personal de Gmail para solicitar transferencias internas urgentes.</div></div>
+        <div class="clue"><div class="clue-icon bad">!</div><div class="clue-text"><strong>Cuenta bancaria nueva:</strong> solicitar un pago a una cuenta que no está en el sistema es la mayor señal de alarma.</div></div>
+        <div class="clue"><div class="clue-icon bad">!</div><div class="clue-text"><strong>"No lo comentes con nadie":</strong> aislar a la víctima evita que consulte con otros y detecte el fraude.</div></div>
+        <div class="clue"><div class="clue-icon bad">!</div><div class="clue-text"><strong>Urgencia + imposibilidad de llamar:</strong> crear presión sin posibilidad de verificación es la táctica central del BEC.</div></div>
+        <div class="clue"><div class="clue-icon bad">!</div><div class="clue-text"><strong>Importe elevado:</strong> los atacantes suelen elegir cantidades que parezcan plausibles pero significativas.</div></div>
+      </div>
+    </div>
+
+    <!-- Gmail: comparar -->
+    <div id="gm-compare" class="section-panel">
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="compare-head real"><span>Correo interno legítimo</span></div>
+          <div class="compare-body">
+            <div class="compare-row"><div class="compare-row-label">Remitente</div><div class="compare-row-val good">@stnceramica.es</div></div>
+            <div class="compare-row"><div class="compare-row-label">Urgencia</div><div class="compare-row-val neutral">Plazo normal</div></div>
+            <div class="compare-row"><div class="compare-row-label">Cuenta bancaria</div><div class="compare-row-val good">Ya registrada</div></div>
+            <div class="compare-row"><div class="compare-row-label">Proveedor</div><div class="compare-row-val neutral">Conocido y habitual</div></div>
+            <div class="compare-row"><div class="compare-row-label">Confidencialidad</div><div class="compare-row-val neutral">Normal</div></div>
+            <div class="compare-row"><div class="compare-row-label">Verificación</div><div class="compare-row-val good">Posible por teléfono</div></div>
+          </div>
+        </div>
+        <div class="compare-card">
+          <div class="compare-head fake"><span>Suplantación Gmail (BEC)</span></div>
+          <div class="compare-body">
+            <div class="compare-row"><div class="compare-row-label">Remitente</div><div class="compare-row-val bad">@gmail.com externo</div></div>
+            <div class="compare-row"><div class="compare-row-label">Urgencia</div><div class="compare-row-val bad">Hoy antes del cierre</div></div>
+            <div class="compare-row"><div class="compare-row-label">Cuenta bancaria</div><div class="compare-row-val bad">Nueva, desconocida</div></div>
+            <div class="compare-row"><div class="compare-row-label">Proveedor</div><div class="compare-row-val bad">Nuevo, sin historial</div></div>
+            <div class="compare-row"><div class="compare-row-label">Confidencialidad</div><div class="compare-row-val bad">"No lo comentes"</div></div>
+            <div class="compare-row"><div class="compare-row-label">Verificación</div><div class="compare-row-val bad">"No puedo llamar"</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="hint-box" style="margin-top:1rem">
+        <div class="hint-title">Protocolo anti-BEC para STN</div>
+        <div class="clue"><div class="clue-icon good">1</div><div class="clue-text"><strong>Verifica SIEMPRE por teléfono</strong> cualquier solicitud de transferencia a cuenta nueva, sin importar quién la pide.</div></div>
+        <div class="clue"><div class="clue-icon good">2</div><div class="clue-text"><strong>Nunca realices pagos urgentes</strong> basándote únicamente en un email, especialmente desde cuentas externas.</div></div>
+        <div class="clue"><div class="clue-icon good">3</div><div class="clue-text"><strong>La confidencialidad forzada es señal de fraude.</strong> Un proceso legítimo no necesita ocultarse.</div></div>
+        <div class="clue"><div class="clue-icon good">4</div><div class="clue-text"><strong>Ante cualquier duda, escala.</strong> Consultar con tu responsable nunca está de más y puede evitar un fraude grave.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB — ¿LEGÍTIMO O FALSO? (carousel)
+  ══════════════════════════════════════════ -->
+  <div id="tab-ambig" class="tab-panel">
+    <div class="ambig-nav">
+      <div class="ambig-nav-info">
+        <div class="ambig-nav-title">Decide antes de ver la respuesta</div>
+        <div class="ambig-nav-count" id="ambig-count">Escenario 1 de 3</div>
+      </div>
+      <div class="ambig-nav-btns">
+        <button class="nav-btn" id="ambig-prev" onclick="ambigNav(-1)" disabled>← Anterior</button>
+        <button class="nav-btn" id="ambig-next" onclick="ambigNav(1)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- S1: DocuSign sutil -->
+    <div class="ambig-scenario active" id="ambig-s0">
+      <p class="step-label">Escenario 1 — Plataforma de firma</p>
+      <div class="email-card">
+        <div class="email-header">
+          <div class="meta-row"><span class="meta-label">De:</span><span class="meta-val">notifications@docusign-mail.com</span></div>
+          <div class="meta-row"><span class="meta-label">Para:</span><span class="meta-val">administracion@stnceramica.es</span></div>
+          <div class="meta-row"><span class="meta-label">Hora:</span><span class="meta-val">Hoy, 9:15 AM</span></div>
+          <div class="subject">Recordatorio: documento pendiente de revisión</div>
+        </div>
+        <div class="email-body">
+          <p class="body-text">Estimada Administración,<br><br>Le recordamos que tiene un documento pendiente de revisión y firma. Por favor acceda antes del <strong>viernes 18 de abril</strong>.</p>
+          <button class="cta-btn cta-ghost">Acceder al documento</button>
+        </div>
+      </div>
+      <div class="ambig-buttons">
+        <button class="ambig-btn" id="a0-legit" onclick="ambigAnswer(0,true)">✅ Es legítimo</button>
+        <button class="ambig-btn" id="a0-fake"  onclick="ambigAnswer(0,false)">❌ Es phishing</button>
+      </div>
+      <div class="ambig-result" id="a0-result"></div>
+      <div class="hint-box" id="a0-tips" style="display:none;margin-top:1rem">
+        <div class="hint-title">Lo que lo hace peligroso</div>
+        <div class="clue"><div class="clue-icon warn">⚠</div><div class="clue-text"><strong>Dominio imitador sutil:</strong> docusign-mail.com suena oficial — solo docusign.com es válido.</div></div>
+        <div class="clue"><div class="clue-icon warn">⚠</div><div class="clue-text"><strong>Tono tranquilizador:</strong> sin urgencia ni amenazas, diseñado para bajar la guardia.</div></div>
+        <div class="clue"><div class="clue-icon warn">⚠</div><div class="clue-text"><strong>Sin especificidad:</strong> no indica qué documento es ni quién lo envía.</div></div>
+      </div>
+    </div>
+
+    <!-- S2: Microsoft ambiguo -->
+    <div class="ambig-scenario" id="ambig-s1">
+      <p class="step-label">Escenario 2 — Alerta de Microsoft</p>
+      <div class="email-card">
+        <div class="email-header">
+          <div class="meta-row"><span class="meta-label">De:</span><span class="meta-val">security@microsoft365-alerts.com</span></div>
+          <div class="meta-row"><span class="meta-label">Para:</span><span class="meta-val">administracion@stnceramica.es</span></div>
+          <div class="meta-row"><span class="meta-label">Hora:</span><span class="meta-val">Hoy, 11:30 AM</span></div>
+          <div class="subject">Inicio de sesión desde nueva ubicación detectado</div>
+        </div>
+        <div class="email-body">
+          <p class="body-text">Hemos detectado un inicio de sesión en tu cuenta de Microsoft desde <strong>Madrid, España</strong>. Si no fuiste tú, te recomendamos cambiar tu contraseña. Si fuiste tú, puedes ignorar este mensaje.</p>
+          <button class="cta-btn cta-ghost">Revisar actividad</button>
+        </div>
+      </div>
+      <div class="ambig-buttons">
+        <button class="ambig-btn" id="a1-legit" onclick="ambigAnswer(1,true)">✅ Es legítimo</button>
+        <button class="ambig-btn" id="a1-fake"  onclick="ambigAnswer(1,false)">❌ Es phishing</button>
+      </div>
+      <div class="ambig-result" id="a1-result"></div>
+      <div class="hint-box" id="a1-tips" style="display:none;margin-top:1rem">
+        <div class="hint-title">Lo que lo delata</div>
+        <div class="clue"><div class="clue-icon warn">⚠</div><div class="clue-text"><strong>Dominio falso:</strong> microsoft365-alerts.com NO es Microsoft. El oficial es microsoft.com.</div></div>
+        <div class="clue"><div class="clue-icon warn">⚠</div><div class="clue-text"><strong>Contenido verosímil:</strong> las alertas de inicio de sesión existen de verdad — el atacante lo sabe e imita exactamente ese formato.</div></div>
+        <div class="clue"><div class="clue-icon warn">⚠</div><div class="clue-text"><strong>Anzuelo sin urgencia:</strong> "si no fuiste tú" provoca curiosidad para hacer clic.</div></div>
+      </div>
+    </div>
+
+    <!-- S3: correo de compañero con Gmail -->
+    <div class="ambig-scenario" id="ambig-s2">
+      <p class="step-label">Escenario 3 — Correo de un compañero</p>
+      <div class="email-card">
+        <div class="email-header">
+          <div class="meta-row"><span class="meta-label">De:</span><span class="meta-val">carmen.garcia.stn@gmail.com</span></div>
+          <div class="meta-row"><span class="meta-label">Para:</span><span class="meta-val">administracion@stnceramica.es</span></div>
+          <div class="meta-row"><span class="meta-label">Hora:</span><span class="meta-val">Hoy, 13:45</span></div>
+          <div class="subject">Factura de formación — pendiente de pago</div>
+        </div>
+        <div class="email-body">
+          <p class="body-text">Hola,<br><br>
+            Te escribo desde mi correo personal porque el corporativo está dando problemas hoy. La factura de la formación de Excel del mes pasado sigue pendiente. Adjunto el PDF. Son <strong>320 €</strong>. Me dices cuando está hecho. Gracias.</p>
+          <button class="cta-btn cta-ghost">Ver factura adjunta</button>
+        </div>
+      </div>
+      <div class="ambig-buttons">
+        <button class="ambig-btn" id="a2-legit" onclick="ambigAnswer(2,true)">✅ Es legítimo</button>
+        <button class="ambig-btn" id="a2-fake"  onclick="ambigAnswer(2,false)">❌ Sospechoso</button>
+      </div>
+      <div class="ambig-result" id="a2-result"></div>
+      <div class="hint-box" id="a2-tips" style="display:none;margin-top:1rem">
+        <div class="hint-title">Por qué debe verificarse antes de actuar</div>
+        <div class="clue"><div class="clue-icon warn">⚠</div><div class="clue-text"><strong>Gmail personal:</strong> aunque la excusa ("correo corporativo con problemas") suena plausible, es la táctica BEC más habitual.</div></div>
+        <div class="clue"><div class="clue-icon warn">⚠</div><div class="clue-text"><strong>Importe pequeño:</strong> los atacantes a veces usan cantidades pequeñas para parecer creíbles y pasar desapercibidos.</div></div>
+        <div class="clue"><div class="clue-icon good">✓</div><div class="clue-text"><strong>Acción correcta:</strong> llama a Carmen por teléfono para confirmar que envió ese correo antes de procesar cualquier pago.</div></div>
+      </div>
+    </div>
+
+    <div class="ambig-score-bar" id="ambig-score" style="display:none">
+      Puntuación: <strong id="ambig-score-val">0 / 0</strong> correctas
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB — QUIZ
+  ══════════════════════════════════════════ -->
+  <div id="tab-quiz" class="tab-panel">
+    <div id="quiz-container">
+      <div class="quiz-progress" id="quiz-progress">Pregunta 1 de 6</div>
+      <div class="quiz-question" id="quiz-question"></div>
+      <div class="quiz-snippet" id="quiz-snippet"></div>
+      <div class="quiz-options" id="quiz-options"></div>
+      <div class="quiz-explanation" id="quiz-explanation"></div>
+      <button class="quiz-next" id="quiz-next" onclick="nextQ()">Siguiente pregunta →</button>
+    </div>
+    <div class="quiz-score" id="quiz-score">
+      <div class="score-num" id="score-num"></div>
+      <div class="score-label" id="score-label"></div>
+      <div class="score-msg" id="score-msg"></div>
+      <button class="quiz-restart" onclick="startQuiz()">🔄 Repetir quiz</button>
+    </div>
+  </div>
+
+</div><!-- /wrapper -->
+
 <script>
+// ─── MAIN TABS ───────────────────────────────
+const TABS = ['docusign','ms365','gmail','ambig','quiz'];
 function showTab(t) {
-  ['real','fake','compare'].forEach(id => {
-    document.getElementById('tab-' + id).classList.toggle('active', id === t);
-  });
-  document.querySelectorAll('.tab').forEach((btn, i) => {
-    btn.classList.toggle('active', ['real','fake','compare'][i] === t);
-  });
+  TABS.forEach(id => document.getElementById('tab-'+id).classList.toggle('active', id===t));
+  document.querySelectorAll('.tabs .tab').forEach((b,i) => b.classList.toggle('active', TABS[i]===t));
+  if (t==='quiz' && !quizStarted) startQuiz();
 }
-function revealLink(type) {
-  document.getElementById('link-' + type).style.display = 'block';
+
+// ─── SECTION TABS ─────────────────────────────
+function showSection(prefix, s) {
+  const ids = {
+    ds: ['ds-real','ds-fake','ds-compare'],
+    ms: ['ms-real','ms-fake','ms-compare'],
+    gm: ['gm-real','gm-fake','gm-compare']
+  }[prefix];
+  const target = prefix+'-'+s;
+  ids.forEach(id => document.getElementById(id).classList.toggle('active', id===target));
+  // update pills
+  const tabEl = document.getElementById('tab-'+{ds:'docusign',ms:'ms365',gm:'gmail'}[prefix]);
+  tabEl.querySelectorAll('.section-tab').forEach((b,i) => b.classList.toggle('active', ['real','fake','compare'][i]===s));
 }
-function revealVerdict(type) {
-  document.getElementById('verdict-' + type).style.display = 'block';
+
+// ─── HELPERS ──────────────────────────────────
+function rl(id) { const e=document.getElementById(id); if(e) e.style.display='block'; }
+function rv(id) { const e=document.getElementById(id); if(e) e.style.display='block'; }
+
+// ─── OVERLAYS ─────────────────────────────────
+function openOv(ovId, linkId) {
+  document.getElementById(ovId).classList.add('show');
+  rl(linkId);
 }
+function closeOv(ovId, verdictId) {
+  document.getElementById(ovId).classList.remove('show');
+  rv(verdictId);
+}
+
+// ─── AMBIGUOUS CAROUSEL ───────────────────────
+let ambigCur = 0;
+const AMBIG_N = 3;
+const ambigAnswers = [null, null, null];
+// All 3 are phishing/suspicious (correct = chose fake/suspicious)
+const ambigResultText = {
+  correct: [
+    '✅ ¡Correcto! Es phishing. El dominio <strong>docusign-mail.com</strong> no es DocuSign. Solo <strong>docusign.com</strong> es válido. El tono educado es la trampa.',
+    '✅ ¡Correcto! Es phishing. <strong>microsoft365-alerts.com</strong> no pertenece a Microsoft. El oficial es <strong>microsoft.com</strong>. Las alertas de inicio de sesión reales vienen de accountprotection.microsoft.com.',
+    '✅ ¡Correcto! Es sospechoso. Aunque puede ser legítimo, siempre debes <strong>llamar a la persona por teléfono</strong> antes de procesar cualquier pago solicitado desde un Gmail personal.'
+  ],
+  wrong: [
+    '❌ Es phishing. El dominio <strong>docusign-mail.com</strong> no es DocuSign. El tono tranquilo es precisamente la táctica para bajar la guardia.',
+    '❌ Es phishing. <strong>microsoft365-alerts.com</strong> no es Microsoft. El oficial es <strong>microsoft.com</strong>. El contenido imita alertas reales para engañar.',
+    '❌ Respuesta incorrecta. Aunque podría ser legítimo, un correo desde Gmail pidiendo un pago interno <strong>siempre debe verificarse por teléfono</strong> antes de actuar. Nunca proceses pagos solo con un email como justificación.'
+  ]
+};
+
+function ambigNav(dir) {
+  ambigCur = Math.max(0, Math.min(AMBIG_N-1, ambigCur+dir));
+  document.querySelectorAll('.ambig-scenario').forEach((s,i) => s.classList.toggle('active', i===ambigCur));
+  document.getElementById('ambig-count').textContent = `Escenario ${ambigCur+1} de ${AMBIG_N}`;
+  document.getElementById('ambig-prev').disabled = ambigCur===0;
+  document.getElementById('ambig-next').disabled = ambigCur===AMBIG_N-1;
+  updateAmbigScore();
+}
+
+function ambigAnswer(idx, userSaysLegit) {
+  const correct = !userSaysLegit; // all are phishing/suspicious
+  ambigAnswers[idx] = correct;
+  const lBtn = document.getElementById(`a${idx}-legit`);
+  const fBtn = document.getElementById(`a${idx}-fake`);
+  const result = document.getElementById(`a${idx}-result`);
+  const tips = document.getElementById(`a${idx}-tips`);
+  lBtn.disabled = fBtn.disabled = true;
+  if (correct) {
+    fBtn.className = 'ambig-btn chosen-correct';
+    result.className = 'ambig-result correct';
+  } else {
+    lBtn.className = 'ambig-btn chosen-wrong';
+    fBtn.className = 'ambig-btn chosen-correct';
+    result.className = 'ambig-result wrong';
+  }
+  result.innerHTML = correct ? ambigResultText.correct[idx] : ambigResultText.wrong[idx];
+  result.style.display = 'block';
+  if (tips) tips.style.display = 'block';
+  updateAmbigScore();
+}
+
+function updateAmbigScore() {
+  const answered = ambigAnswers.filter(a => a!==null).length;
+  if (!answered) return;
+  const correct = ambigAnswers.filter(a => a===true).length;
+  document.getElementById('ambig-score').style.display = 'flex';
+  document.getElementById('ambig-score-val').textContent = `${correct} / ${answered}`;
+}
+
+// ─── QUIZ ──────────────────────────────────────
+const QS = [
+  {
+    q: '¿Cuál de estos remitentes es legítimo para DocuSign?',
+    s: '<span class="sq"><span class="lbl">A)</span> no-reply@docusign-notifications.net</span><span class="sq"><span class="lbl">B)</span> noreply@docusign.com</span><span class="sq"><span class="lbl">C)</span> support@docusign.helpdesk.com</span>',
+    o: ['A) docusign-notifications.net','B) noreply@docusign.com','C) docusign.helpdesk.com'],
+    c: 1,
+    e: '✅ Solo <strong>docusign.com</strong> es el dominio oficial. Cualquier variación es un dominio de atacantes.'
+  },
+  {
+    q: '¿Cuál es el dominio legítimo de Microsoft para alertas de seguridad de cuenta?',
+    s: '<span class="sq"><span class="lbl">A)</span> security@microsoft-account-alerts.com</span><span class="sq"><span class="lbl">B)</span> account-security-noreply@accountprotection.microsoft.com</span><span class="sq"><span class="lbl">C)</span> noreply@microsoft365security.net</span>',
+    o: ['A) microsoft-account-alerts.com','B) accountprotection.microsoft.com ✓','C) microsoft365security.net'],
+    c: 1,
+    e: '✅ <strong>accountprotection.microsoft.com</strong> es un subdominio legítimo de microsoft.com. Microsoft nunca usa dominios .net ni dominios con guiones.'
+  },
+  {
+    q: 'Un compañero te escribe desde un Gmail personal pidiendo una transferencia urgente. ¿Qué haces?',
+    s: '<span class="sq"><span class="lbl">De:</span> miguel.rebolledo.stn@gmail.com</span><span class="sq"><span class="lbl">Asunto:</span> URGENTE — transferencia a proveedor nuevo HOY</span><span class="sq"><span class="lbl">Cuerpo:</span> "Estoy en reunión, no puedo llamar..."</span>',
+    o: ['Proceso la transferencia — el texto parece de él','Llamo al compañero por teléfono para confirmar antes de hacer nada','Respondo al email pidiendo más datos'],
+    c: 1,
+    e: '✅ <strong>Llama siempre por teléfono</strong> antes de procesar cualquier pago solicitado por email, especialmente desde cuentas externas. Nunca respondas al propio email sospechoso para verificar.'
+  },
+  {
+    q: 'Un email de Microsoft pide que introduzcas tu contraseña en un enlace. ¿Qué indica esto?',
+    s: '<span class="sq"><span class="lbl">Asunto:</span> Verifica tu identidad — acceso comprometido</span><span class="sq"><span class="lbl">Cuerpo:</span> "Introduce tus credenciales para confirmar que eres el propietario de la cuenta."</span>',
+    o: ['Puede ser legítimo si el botón parece de Microsoft','Es phishing — Microsoft nunca pide credenciales por email','Puede ser legítimo si el asunto parece urgente'],
+    c: 1,
+    e: '✅ <strong>Microsoft nunca solicita contraseñas a través de un enlace en un email.</strong> Si un correo lo hace, es phishing sin excepciones. Ve directamente a portal.microsoft.com.'
+  },
+  {
+    q: 'En un email de BEC (suplantación interna), ¿cuál es la señal más peligrosa a ignorar?',
+    s: '<span class="sq"><span class="lbl">Texto:</span> "Es confidencial, no lo comentes con nadie hasta que yo confirme."</span>',
+    o: ['La urgencia de tiempo ("HOY antes del cierre")','La petición de confidencialidad que aísla a la víctima','El importe elevado de la transferencia'],
+    c: 1,
+    e: '✅ La <strong>petición de confidencialidad</strong> es la señal más grave: aislar a la víctima impide que consulte con otros y detecte el fraude. Un proceso legítimo nunca necesita ocultarse.'
+  },
+  {
+    q: '¿Qué medida es más efectiva para proteger tu cuenta de Microsoft 365 si roban tu contraseña?',
+    s: '<span class="sq">Un atacante obtiene tu usuario y contraseña.</span><span class="sq">¿Qué le impide acceder a tu cuenta?</span>',
+    o: ['Tener una contraseña larga y compleja','Tener el MFA (autenticación multifactor) activado','Usar Chrome en lugar de Edge'],
+    c: 1,
+    e: '✅ El <strong>MFA (autenticación multifactor)</strong> es la defensa más efectiva. Aunque el atacante tenga tu contraseña, necesitará el segundo factor (tu móvil) para acceder.'
+  }
+];
+
+let curQ=0, score=0, quizStarted=false;
+
+function startQuiz() {
+  curQ=0; score=0; quizStarted=true;
+  document.getElementById('quiz-score').style.display='none';
+  document.getElementById('quiz-container').style.display='block';
+  renderQ();
+}
+
+function renderQ() {
+  const q=QS[curQ];
+  document.getElementById('quiz-progress').textContent=`Pregunta ${curQ+1} de ${QS.length}`;
+  document.getElementById('quiz-question').textContent=q.q;
+  document.getElementById('quiz-snippet').innerHTML=q.s;
+  document.getElementById('quiz-options').innerHTML=q.o.map((o,i)=>`<button class="quiz-opt" onclick="answerQ(${i})">${o}</button>`).join('');
+  const exp=document.getElementById('quiz-explanation');
+  exp.className='quiz-explanation'; exp.innerHTML='';
+  document.getElementById('quiz-next').className='quiz-next';
+}
+
+function answerQ(idx) {
+  const q=QS[curQ];
+  const btns=document.querySelectorAll('.quiz-opt');
+  btns.forEach(b=>b.disabled=true);
+  btns[q.c].classList.add('correct');
+  if(idx!==q.c) btns[idx].classList.add('wrong'); else score++;
+  const exp=document.getElementById('quiz-explanation');
+  exp.innerHTML=q.e; exp.className='quiz-explanation show';
+  const nb=document.getElementById('quiz-next');
+  nb.textContent=curQ<QS.length-1?'Siguiente pregunta →':'Ver resultado final';
+  nb.className='quiz-next show';
+}
+
+function nextQ() {
+  curQ++;
+  if(curQ>=QS.length) showScore(); else renderQ();
+}
+
+function showScore() {
+  document.getElementById('quiz-container').style.display='none';
+  document.getElementById('quiz-score').style.display='block';
+  document.getElementById('score-num').textContent=`${score}/${QS.length}`;
+  const L=['Necesitas repasar los conceptos','Sigue practicando','Buen nivel','¡Muy buen resultado!','¡Excelente!','¡Perfecto!'];
+  const M=[
+    'Vuelve a revisar las pestañas de DocuSign, M365 y Suplantación. Presta especial atención a los dominios oficiales.',
+    'Tienes las bases pero hay áreas que reforzar. Repasa especialmente el escenario de BEC (suplantación Gmail).',
+    'Buen nivel de concienciación. Repasa las reglas de MFA y el protocolo ante solicitudes de transferencia.',
+    'Muy buen resultado. Estás preparado para detectar la mayoría de ataques.',
+    '¡Excelente! Tienes un nivel de concienciación muy alto. Comparte este conocimiento con tu equipo.',
+    '¡Perfecto! Dominas todos los conceptos. Eres un activo clave en la seguridad de STN.'
+  ];
+  document.getElementById('score-label').textContent = L[score] || L[5];
+  document.getElementById('score-msg').textContent = M[score] || M[5];
+}
+
+startQuiz();
 </script>
 </body>
 </html>
