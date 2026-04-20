@@ -311,6 +311,171 @@ body::before {
 .score-label { font-size: 15px; color: #666; margin: 8px 0 1rem; }
 .score-msg { font-size: 14px; color: #555; line-height: 1.6; max-width: 380px; margin: 0 auto 1.5rem; }
 .quiz-restart { padding: 10px 24px; border-radius: 8px; border: none; background: #378add; color: #fff; font-size: 14px; font-weight: 500; cursor: pointer; }
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE MOBILE — max-width: 640px
+══════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  /* ── LAYOUT ── */
+  body { background-attachment: scroll; }
+
+  .page-header { padding: 1.25rem 1rem 1rem; }
+  .page-header .logo-corner img { height: 40px; }
+  .page-header .logo-corner { top: .75rem; right: .75rem; }
+  .page-header h1 { font-size: 17px; }
+  .page-header p { font-size: 12px; }
+  .page-header .shield { width: 32px; height: 32px; font-size: 16px; }
+
+  .page-content { padding: 0 .6rem 1.5rem; }
+  .content-card { padding: 1rem .85rem; border-radius: 12px; }
+
+  /* ── MAIN TABS → scroll horizontal ── */
+  .tabs {
+    gap: 5px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+    margin-bottom: 1rem;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    padding: 7px 12px;
+    font-size: 12px;
+    flex-shrink: 0;
+    border-radius: 20px;
+  }
+
+  /* ── SECTION TABS → scroll horizontal ── */
+  .section-tabs {
+    gap: 5px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 6px;
+  }
+  .section-tabs::-webkit-scrollbar { display: none; }
+  .section-tab {
+    padding: 5px 12px;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  /* ── EMAIL CARD ── */
+  .email-header { padding: .75rem .9rem; }
+  .meta-row { font-size: 12px; margin-bottom: 4px; flex-wrap: wrap; gap: 4px; }
+  .meta-label { min-width: 30px; }
+  .meta-val { font-size: 12px; }
+  .meta-val.ok, .meta-val.suspicious { font-size: 11px; padding: 2px 6px; }
+  .subject { font-size: 13px; }
+  .email-body { padding: .9rem; }
+  .body-text { font-size: 13px; }
+
+  /* ── TOOLTIP → arriba en móvil ── */
+  .tooltip {
+    top: auto;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 220px;
+    font-size: 11px;
+  }
+
+  /* ── BUTTONS ── */
+  .cta-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 12px;
+    font-size: 14px;
+  }
+  .inspect-btn { font-size: 11px; padding: 6px 10px; }
+  .action-row { gap: 6px; }
+  .verdict { font-size: 12px; }
+
+  /* ── HINT BOX ── */
+  .hint-box { padding: .85rem; }
+  .clue { font-size: 12px; padding: 7px 0; }
+  .hint-title { font-size: 11px; }
+
+  /* ── COMPARE GRID → 1 columna ── */
+  .compare-grid { grid-template-columns: 1fr; gap: 8px; }
+
+  /* ── PHISHING OVERLAY ── */
+  .phish-overlay { align-items: flex-end; padding: 0; }
+  .phish-modal {
+    border-radius: 20px 20px 0 0;
+    max-width: 100%;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 1.5rem 1.25rem;
+    animation: slideUpModal .3s ease;
+  }
+  @keyframes slideUpModal {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+  .phish-modal .icon { font-size: 36px; margin-bottom: .5rem; }
+  .phish-modal h2 { font-size: 17px; }
+  .phish-modal p { font-size: 13px; }
+  .phish-flags li { font-size: 12px; }
+  .phish-close { padding: 12px; font-size: 14px; }
+
+  /* ── AMBIGUOUS CAROUSEL ── */
+  .ambig-nav { flex-direction: column; gap: 8px; align-items: flex-start; }
+  .ambig-nav-btns { width: 100%; display: flex; gap: 8px; }
+  .nav-btn { flex: 1; text-align: center; padding: 8px; font-size: 12px; }
+  .ambig-buttons { gap: 8px; }
+  .ambig-btn { padding: 10px; font-size: 13px; min-width: 0; }
+  .ambig-result { font-size: 13px; }
+
+  /* ── DOMAIN VALIDATOR ── */
+  .dom-search { font-size: 14px; padding: 10px 40px 10px 12px; }
+  .trap-chips { gap: 5px; }
+  .trap-chip { font-size: 11px; padding: 4px 9px; }
+  .dom-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .dom-pill { font-size: 12px; padding: 6px 9px; }
+
+  /* ── QUIZ ── */
+  .quiz-question { font-size: 14px; }
+  .quiz-snippet { font-size: 12px; line-height: 1.7; padding: .75rem; }
+  .sq .lbl { min-width: 50px; font-size: 11px; }
+  .quiz-opt { font-size: 12px; padding: 9px 12px; }
+  .quiz-explanation { font-size: 12px; }
+  .score-num { font-size: 42px; }
+  .score-label { font-size: 14px; }
+  .score-msg { font-size: 13px; }
+  .quiz-restart { width: 100%; padding: 12px; font-size: 14px; }
+  .quiz-next { width: 100%; padding: 11px; font-size: 13px; text-align: center; }
+
+  /* ── FOOTER ── */
+  .page-footer span { font-size: 11px; }
+  .page-footer .footer-brand { font-size: 11px; }
+
+  /* ── IBAN TABLE in BEC scenario ── */
+  table { font-size: 12px; }
+  table td { padding: 5px 8px !important; }
+
+  /* ── BADGES ── */
+  .badge { font-size: 11px; padding: 2px 8px; }
+
+  /* ── STEP LABEL ── */
+  .step-label { font-size: 11px; }
+}
+
+/* ── EXTRA SMALL (iPhone SE, etc.) ── */
+@media (max-width: 380px) {
+  .page-header h1 { font-size: 15px; }
+  .tab { font-size: 11px; padding: 6px 10px; }
+  .dom-grid { grid-template-columns: 1fr; }
+  .ambig-btn { font-size: 12px; padding: 9px; }
+}
+
 </style>
 </head>
 <body>
@@ -1527,7 +1692,7 @@ const QS = [
   {
     q: '¿Cuál es el dominio legítimo de Microsoft para alertas de seguridad de cuenta?',
     s: '<span class="sq"><span class="lbl">A)</span> security@microsoft-account-alerts.com</span><span class="sq"><span class="lbl">B)</span> account-security-noreply@accountprotection.microsoft.com</span><span class="sq"><span class="lbl">C)</span> noreply@microsoft365security.net</span>',
-    o: ['A) microsoft-account-alerts.com','B) accountprotection.microsoft.com ✓','C) microsoft365security.net'],
+    o: ['A) microsoft-account-alerts.com','B) accountprotection.microsoft.com','C) microsoft365security.net'],
     c: 1,
     e: '✅ <strong>accountprotection.microsoft.com</strong> es un subdominio legítimo de microsoft.com. Microsoft nunca usa dominios .net ni dominios con guiones.'
   },
@@ -1570,7 +1735,7 @@ const QS = [
   {
     q: '¿Cuál de estos remitentes pertenece a una empresa del Grupo STN?',
     s: '<span class="sq"><span class="lbl">A)</span> reservas@sunnahotel.net</span><span class="sq"><span class="lbl">B)</span> info@stn-ceramica.es</span><span class="sq"><span class="lbl">C)</span> contacto@venuxsurface.es</span>',
-    o: ['A) sunnahotel.net', 'B) stn-ceramica.es', 'C) venuxsurface.es ✓'],
+    o: ['A) sunnahotel.net', 'B) stn-ceramica.es', 'C) venuxsurface.es'],
     c: 2,
     e: '✅ <strong>@venuxsurface.es</strong> es un dominio oficial del Grupo STN. <br>❌ <strong>sunnahotel.net</strong> — el oficial es @sunnahotel.es o @sunnahotel.com, no .net.<br>❌ <strong>stn-ceramica.es</strong> — el guión lo delata; el oficial es @stnceramica.es sin guión.'
   },
@@ -1585,7 +1750,7 @@ const QS = [
   {
     q: '🔍 Nivel difícil — ¿Cuál de estos dominios es el ÚNICO legítimo del Grupo STN?',
     s: '<span class="sq"><span class="lbl">A)</span> info@stncerramica.es &nbsp;<small style="color:#e24b4a">(doble r)</small></span><span class="sq"><span class="lbl">B)</span> pedidos@stnceramica.es &nbsp;<small style="color:#1d9e75">(oficial)</small></span><span class="sq"><span class="lbl">C)</span> ventas@stncerámica.es &nbsp;<small style="color:#e24b4a">(acento)</small></span><span class="sq"><span class="lbl">D)</span> info@stnceramica.es.com &nbsp;<small style="color:#e24b4a">(doble extensión)</small></span>',
-    o: ['A) stncerramica.es — parece igual', 'B) stnceramica.es ✓', 'C) stncerámica.es — lleva acento', 'D) stnceramica.es.com — extensión doble'],
+    o: ['A) stncerramica.es — parece igual', 'B) stnceramica.es', 'C) stncerámica.es — lleva acento', 'D) stnceramica.es.com — extensión doble'],
     c: 1,
     e: '✅ Solo <strong>@stnceramica.es</strong> es legítimo.<br>❌ <strong>stncerr<u>a</u>mica.es</strong> — lleva doble r, casi invisible a primera vista.<br>❌ <strong>stncer<u>á</u>mica.es</strong> — el acento en la á es un truco: el dominio IDN parece idéntico pero es diferente.<br>❌ <strong>stnceramica.es.com</strong> — la doble extensión .es.com es una táctica clásica para confundir.'
   },
